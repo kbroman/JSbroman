@@ -8,24 +8,26 @@
 
 <h3 style="font-family:sans-serif">Scatterplot with slider</h3>
 
+<div id="button"><button>Randomize</button></div>
+
 <div style="font-size:14px;font-family:sans-serif">Size of points:
     <input style="position:relative;top:4px;" type="range" min="1" max="50" value="5"></div>
 
 
-<div id="chart"></div>
+<div id="chart" style="position:relative;top:10px;"></div>
 
 <script type="text/javascript">
 (function(){
 
   var w=500, h=300;
-  var xPad = 10, yPad = 10;
+  var xPad = 3, yPad = 3;
+  var padMult=2;
 
   var dataset = [];
   for(i=0; i<10; i++) {
-    dataset[i] = [Math.random()*(w-4*xPad)+2*xPad,
-                  Math.random()*(h-4*yPad)+2*yPad];
+    dataset[i] = [Math.random()*(w-2*padMult*xPad)+padMult*xPad,
+                  Math.random()*(h-2*padMult*yPad)+padMult*yPad];
   }
-
 
   var svg = d3.select("#chart").append("svg:svg")
                       .attr("width", w)
@@ -35,7 +37,6 @@
      .attr("x", xPad).attr("y",yPad)
      .attr("width", w-xPad*2).attr("height",h-yPad*2)
      .attr("fill", "rgb(230,230,230)").attr("stroke", "black");
-
 
   var circles = svg.selectAll("circle")
      .data(dataset)
@@ -52,10 +53,23 @@
             d3.select(this).attr("fill", "steelblue");
           })
 
-
   d3.select("input[type=range]").on("change", function() {
      circles.attr("r", this.value);});
 
+  d3.select("#button button").on("click", function() {
+      var randomx = [];
+      var randomy = [];
+      for(i=0; i<dataset.length; i++) {
+        randomx[i] = Math.random()*(w-2*padMult*xPad)+padMult*xPad;
+        randomy[i] = Math.random()*(h-2*padMult*yPad)+padMult*yPad;
+      }
+
+      circles.transition()
+          .duration(1500)
+          .attr("cx", function(d,i) { return randomx[i];})
+          .attr("cy", function(d,i) { return randomy[i];});
+
+  });
 
   circles.append("title")
        .text(function(d,i) { return "point " + (i+1); });
