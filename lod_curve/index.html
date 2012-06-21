@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="http://d3js.org/d3.v2.min.js"></script>
+<title>Slightly interactive LOD curve</title>
+</head>
+<body>
+
+<h3 style="font-family:sans-serif">Slightly interactive LOD curve</h3>
+
+<div id="lodchart" style="position:relative;top:10px;"></div>
+
+<script type="text/javascript">
+
+var w=800, h=400;
+var pad = {bottom:50, left:50, top:3, right:3, internal:5}
+var radius = {normal: 7, selected: 7};
+var circ_color = {normal: "slateblue", selected: "violet"};
+
+d3.text("lod.csv", function(datasetText) { 
+  var parsedCSV = d3.csv.parseRows(datasetText);
+
+  var onechr = [];
+  for(var i=0; i<parsedCSV.length; i++) {
+    if(parsedCSV[i][1] === "1") {
+      onechr.push(parsedCSV[i]);
+    }
+  }
+
+  var svg = d3.select("#lodchart")
+              .append("svg")
+                .attr("width", w)
+                .attr("height", h);
+
+//  svg.append("rect").attr("x", 0).attr("y", 0).attr("height",h).attr("width",w).attr("fill", "slateblue");
+
+  svg.append("rect")
+       .attr("x", pad.left).attr("y",pad.top)
+       .attr("width", w-(pad.left+pad.right))
+       .attr("height",h-(pad.top+pad.bottom))
+       .attr("fill", "rgb(230,230,230)")
+       .attr("stroke", "black");
+
+  var xMin = d3.min(onechr, function(d) { return Number(d[2]); });
+  var xMax = d3.max(onechr, function(d) { return Number(d[2]); });
+
+  yMin = 0;
+  yMax = d3.max(onechr, function(d) { return Number(d[3]); });
+
+  xScale=d3.scale.linear().domain([xMin, xMax])
+                          .range([pad.left+pad.internal, w-pad.right-pad.internal]);
+  yScale=d3.scale.linear().domain([yMin, yMax])
+                          .range([h-pad.bottom-pad.internal, pad.top+pad.internal]);
+
+  var line = d3.svg.line()
+                 .x(function(d) { return xScale(d[2]); })
+                 .y(function(d) { return yScale(d[3]); })
+                 .interpolate("linear");
+
+  svg.append("svg:path")
+       .attr("fill", "none")
+       .attr("stroke","slateblue")
+       .attr("stroke-width", 2)
+       .attr("d", line(onechr))
+
+
+  var onedigit = d3.format(".1f");
+
+  var circles = svg.selectAll("circle")
+                      .data(onechr)
+                      .enter()
+                       .append("circle")
+                         .attr("cx", function(d) { return xScale(d[2]); })
+                         .attr("cy", function(d) { return yScale(d[3]); })
+                         .attr("r", radius.normal)
+                         .attr("opacity", "0")
+                         .attr("fill", circ_color.normal)
+                   .on("mouseover", function() {
+                            d3.select(this).
+                                attr("fill", circ_color.selected)
+                         .attr("opacity", "0.6")
+                                .attr("r", radius.selected); })
+                   .on("mouseout", function() {
+                            d3.select(this)
+                                .attr("fill", circ_color.normal)
+                         .attr("opacity", "0")
+                                .attr("r", radius.normal); })
+                    .append("title").text(function(d) {
+                        var title = "LOD = " + onedigit(d[3]) + "\npos = "+ onedigit(d[2]);
+                        var pattern = /^c.+\.loc-*[0-9]+$/;
+                        if(!d[0].match(pattern)) { // is Marker?
+                            title = d[0] + "\n" + title;
+                        }
+                        return title; });
+
+});
+
+</script>
+</div>
+
+
+</body></html>
