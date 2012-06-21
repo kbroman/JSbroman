@@ -9,21 +9,24 @@
 <!-- Constructed following Scott Murray's tutorial:
      http://alignedleft.com/tutorials/d3/ -->
 
-<div id="divbutton"><button>Randomize</button>
+<div id="button" style="float:left"><button>Randomize</button></div>
+
+<div id="chart" style="float:left"></div>
 <script type="text/javascript">
 (function(){
 
 var w=500, h=300;
-var xPad = 10, yPad = 10;
+var xPad = 3, yPad = 3;
+var padMult=2;
 
 var dataset = [];
 for(i=0; i<10; i++) {
-  dataset[i] = [Math.random()*(w-4*xPad)+2*xPad,
-                Math.random()*(h-4*yPad)+2*yPad];
+  dataset[i] = [Math.random()*(w-2*padMult*xPad)+padMult*xPad,
+                Math.random()*(h-2*padMult*yPad)+padMult*yPad];
 }
 
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#chart").append("svg")
                     .attr("width", w)
                     .attr("height", h);
 
@@ -52,12 +55,12 @@ var text = svg.selectAll("text")
       .style("text-anchor", "bottom-left")
       .text(function(d, i) { return i+1; });
 
-d3.select("#divbutton button").on("click", function() {
+d3.select("#button button").on("click", function() {
     var randomx = [];
     var randomy = [];
     for(i=0; i<dataset.length; i++) {
-      randomx[i] = Math.random()*(w-4*xPad)+2*xPad;
-      randomy[i] = Math.random()*(h-4*yPad)+2*yPad;
+      randomx[i] = Math.random()*(w-2*padMult*xPad)+padMult*xPad;
+      randomy[i] = Math.random()*(h-2*padMult*yPad)+padMult*yPad;
     }
 
     circles.transition()
@@ -73,7 +76,6 @@ d3.select("#divbutton button").on("click", function() {
 
 })();
 </script>
-</div>
 
 
 </body></html>
