@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
 <script type="text/javascript" src="http://d3js.org/d3.v2.min.js"></script>
-<script type="text/javascript" src="http://www.biostat.wisc.edu/~kbroman/D3/d3.tip.min.js"></script>
+<script type="text/javascript" src="http://www.biostat.wisc.edu/~kbroman/D3/d3.tip.js"></script>
 <title>Slightly interactive LOD curve</title>
 
   <style type="text/css">
@@ -30,12 +30,18 @@
      font-size: 11px;
    }
 
+   p {
+     font-family: sans-serif;
+   }
+
   </style>
 
 </head>
 <body>
 
 <h3 style="font-family:sans-serif">Slightly interactive LOD curve</h3>
+
+<p>Hover over the markers (the pink dots).
 
 <div id="lodchart" style="position:relative;top:10px;"></div>
 
@@ -193,8 +199,7 @@ d3.text("lod.csv", function(datasetText) {
                          .attr("r", 7)
                          .attr("opacity", 0)
                          .attr("fill", "violet")
-                    .on("mouseover", function() {
-                             tip.apply(this, arguments); });
+                      .on("mouseover", tip);
 
 });
 
