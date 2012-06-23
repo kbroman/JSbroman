@@ -75,7 +75,6 @@ d3.text("lod.csv", function(datasetText) {
    var tip = d3.svg.tip()
           .orient("right")
           .padding(3)
-          .text(function(d) { return "LOD = " + onedigit(d[3]); })
           .text(function(d) {
                         var title = "LOD = " + onedigit(d[3]) + "  pos = "+ onedigit(d[2]);
                         var pattern = /^c.+\.loc-*[0-9]+$/;
