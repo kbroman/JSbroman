@@ -198,7 +198,9 @@ d3.text("lod.csv", function(datasetText) {
                          .attr("r", 7)
                          .attr("opacity", 0)
                          .attr("fill", "violet")
-                      .on("mouseover", tip);
+                      .on("mouseover", tip.attr("id", "d3tip"))
+                      .on('mouseout', function() { d3.selectAll("#d3tip").remove(); });
+
 
 });
 
