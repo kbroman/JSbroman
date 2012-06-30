@@ -3,7 +3,6 @@ plotframe = null
 plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   # default name to place chart
   chartname = args?.chartname ? "body"
-  console.log chartname
 
   # create SVG object if necessary
   if svgscale.svg is null
@@ -13,14 +12,10 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
       .append("svg")
       .attr("height", height)
       .attr("width", width)
-    console.log "Created svg with height=#{height} and width=#{width}."
 
   # padding
   pad = args?.pad ? {bottom: 50, left: 50, top: 3, right: 3, scale: 0.05}
   
-  # background color
-  bgcolor = args?.bgcolor ? "rgb(230,230,230)"
-
   # make background rectangle
   svgscale.svg.append("rect")
     .attr("id", "bgrect")
@@ -28,7 +23,6 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
     .attr("y", pad.top)
     .attr("width", width-(pad.left+pad.right))
     .attr("height", height-(pad.top+pad.bottom))
-    .attr("fill", bgcolor)
 
   # names of X and Y variables
   x_name = args?.x_name ? "x"
@@ -67,9 +61,6 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   x_ticks = svgscale.x.ticks(num_x_ticks)
   y_ticks = svgscale.y.ticks(num_y_ticks)
 
-  console.log x_ticks
-  console.log y_ticks
-
   # vertical and horizontal lines
   svgscale.svg.selectAll("#verline")
       .data(x_ticks)
@@ -98,17 +89,18 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   # x and y axis numbers
   svgscale.svg.append("g")
        .attr("class", "axis")
-       .attr("transform", "translate(0," + (height - pad.bottom) + ")")
+       .attr("transform", "translate(0, #{height - pad.bottom})")
        .call(x_axis)
 
   svgscale.svg.append("g")
        .attr("class", "axis")
-       .attr("transform", "translate(" + pad.left + ",0)")
+       .attr("transform", "translate(#{pad.left}, 0)")
        .call(y_axis)
 
   # x and y axis labels
   xlab = args?.xlab ? x_name
   ylab = args?.ylab ? y_name
+  ylab_rotate = args?.ylab_rotate ? 270
 
   svgscale.svg.append("text")
      .attr("x", width/2)
@@ -117,12 +109,18 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
      .style("font-family", "sans-serif")
      .text(xlab)
 
-  svgscale.svg.append("text")
+  if ylab_rotate
+    rotation = "rotate( #{ylab_rotate} #{pad.left/4} #{height/2})"
+  else
+    rotation = "rotate(0 0 0)"
+
+  ylabel = svgscale.svg.append("text")
      .attr("x", pad.left/4)
      .attr("y", height/2)
      .attr("class", "axislabel")
-     .attr("transform", "rotate(270 " + pad.left/4 + " " + height/2 + ")")
      .style("font-family", "sans-serif")
+     .attr("transform", rotation)
      .text(ylab)
 
   svgscale
+
