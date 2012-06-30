@@ -103,20 +103,20 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   ylab_rotate = args?.ylab_rotate ? 270
 
   svgscale.svg.append("text")
-     .attr("x", width/2)
+     .attr("x", (pad.left + width - pad.right)/2)
      .attr("y", height-pad.bottom/4)
      .attr("class", "axislabel")
      .style("font-family", "sans-serif")
      .text(xlab)
 
   if ylab_rotate
-    rotation = "rotate( #{ylab_rotate} #{pad.left/4} #{height/2})"
+    rotation = "rotate( #{ylab_rotate} #{pad.left/4} #{(pad.top+height-pad.bottom)/2})"
   else
     rotation = "rotate(0 0 0)"
 
   ylabel = svgscale.svg.append("text")
      .attr("x", pad.left/4)
-     .attr("y", height/2)
+     .attr("y", (pad.top + height - pad.bottom)/2)
      .attr("class", "axislabel")
      .style("font-family", "sans-serif")
      .attr("transform", rotation)
