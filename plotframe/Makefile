@@ -1,7 +1,7 @@
-all: plotframe.js example.js
+all: plotframe.js plotframe_example.js
 
 plotframe.js: plotframe.coffee
 	coffee -bc plotframe
 
-example.js: example.coffee
-	coffee -bc example
+plotframe_example.js: plotframe_example.coffee
+	coffee -bc plotframe_example

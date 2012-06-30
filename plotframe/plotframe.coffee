@@ -3,6 +3,7 @@ plotframe = null
 plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   # default name to place chart
   chartname = args?.chartname ? "body"
+  console.log chartname
 
   # create SVG object if necessary
   if svgscale.svg is null
@@ -58,8 +59,10 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   num_x_ticks = args?.num_x_ticks ? 6
   num_y_ticks = args?.num_y_ticks ? 6
 
-  x_axis = d3.svg.axis().scale(svgscale.x).orient("bottom").ticks(num_x_ticks).tickSize(0,0,0)
-  y_axis = d3.svg.axis().scale(svgscale.y).orient("left").ticks(num_y_ticks).tickSize(0,0,0)
+  tickPadding = args?.tickPadding ? 3
+
+  x_axis = d3.svg.axis().scale(svgscale.x).orient("bottom").ticks(num_x_ticks).tickSize(0,0,0).tickPadding(tickPadding);
+  y_axis = d3.svg.axis().scale(svgscale.y).orient("left").ticks(num_y_ticks).tickSize(0,0,0).tickPadding(tickPadding);
 
   x_ticks = svgscale.x.ticks(num_x_ticks)
   y_ticks = svgscale.y.ticks(num_y_ticks)
@@ -110,18 +113,16 @@ plotframe = (data, args=null, svgscale={svg:null, x:null, y:null}) ->
   svgscale.svg.append("text")
      .attr("x", width/2)
      .attr("y", height-pad.bottom/4)
+     .attr("class", "axislabel")
      .style("font-family", "sans-serif")
      .text(xlab)
 
   svgscale.svg.append("text")
      .attr("x", pad.left/4)
      .attr("y", height/2)
+     .attr("class", "axislabel")
      .attr("transform", "rotate(270 " + pad.left/4 + " " + height/2 + ")")
      .style("font-family", "sans-serif")
      .text(ylab)
-
-  # box around background rectangle
-  svgscale.svg.selectAll("#bgrect")
-    .attr("stroke", "black")
 
   svgscale
