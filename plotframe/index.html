@@ -41,7 +41,8 @@ for(i=0; i<dat.length; i++) {
   dat[i].y += dat[i].x;
 }
 
-var svgscale = plotframe(dat, {height: 250, width: 500, xlab: "x axis", ylab: "y axis"})
+var svgscale = plotframe(dat, {height: 400, width: 700, xlab: "x axis", ylab: "y axis",
+pad: {bottom: 50, left: 80, top: 3, right: 3, scale: 0.05}});
 
 svgscale.svg.selectAll("circle")
    .data(dat)
