@@ -97,7 +97,7 @@ function dnorm(x)
 // calculate density estimate
 function densityEstimate(data, bw, minx, maxx, numPoints)
 {
-  var xy = new Array(2);
+  var xy = [];
   for(var i=0; i < nPoints; i++) {
     xy[i] = [minx + (maxx-minx)*i/numPoints, 0];
   }
