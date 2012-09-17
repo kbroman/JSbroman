@@ -191,7 +191,7 @@ var onedigit = d3.format(".1f");
        .attr("stroke-width", 3)
        .attr("d", line(xy))
 
-  var bwtext = d3.select("body").selectAll("p")
+  var bwtext = d3.select("body").selectAll("#bandwidth")
     .data([ bandwidth ]);
 
   d3.select("input[type=range]").on("change", function() {
