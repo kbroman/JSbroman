@@ -25,7 +25,7 @@
 <div id="chart" style="position:relative;top:10px;"></div>
 
 <div style="font-size:14px;font-family:sans-serif">
-<p id="bandwidth">Bandwidth = 1.0</p>
+<p id="bandwidth">Bandwidth = 1.00</p>
 <input style="position:relative;top:4px;" type="range" min="-2" max="1" step = "0.05" value="0">
 </div>
 
@@ -79,6 +79,9 @@ var dat = [ 23.78, 28.677, 25.292, 26.731, 27, 27.821, 28.406, 20.756, 21.481,
             42.058, 35.851, 39.923, 29.477, 36.184, 40.489, 29.649, 37.42, 28.514,
             30.68, 28.627, 34.426, 34.089, 36.252, 36.342, 36.051, 33.149, 33.698,
             40.206, 35.501, 39.233 ];
+
+var twodigits = d3.format(".2f");
+var threedigits = d3.format(".3f");
 
 var bandwidth = 1;
 var nPoints = 250;
@@ -192,10 +195,15 @@ var onedigit = d3.format(".1f");
     .data([ bandwidth ]);
 
   d3.select("input[type=range]").on("change", function() {
-       xy = densityEstimate(dat, Math.pow(10, this.value), xMin, xMax, nPoints);
+       bandwidth = Math.pow(10, this.value);
+
+       xy = densityEstimate(dat, bandwidth, xMin, xMax, nPoints);
        path.transition().attr("d", line(xy));
 
-       bwtext.transition().text("Bandwidth = " + String(Math.pow(10, this.value)));
+       if(bandwidth > 0.095)
+         bwtext.transition().text("Bandwidth = " + twodigits(bandwidth));
+       else
+         bwtext.transition().text("Bandwidth = " + threedigits(bandwidth));
 
      });
 
