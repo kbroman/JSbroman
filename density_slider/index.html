@@ -32,7 +32,7 @@
 <script type="text/javascript">
 (function(){
 
-var dat = [ 23.78, 28.677, 25.292, 26.731, 27, 27.821, 28.406, 20.756, 21.481,
+var mixData = [ 23.78, 28.677, 25.292, 26.731, 27, 27.821, 28.406, 20.756, 21.481,
             22.652, 26.671, 25.059, 27.786, 27.754, 22.684, 24.671, 28.801,
             20.712, 25.48, 28.457, 22.383, 25.497, 23.361, 23.026, 29.279, 17.108,
             23.976, 25.463, 28.413, 31.576, 24.201, 27.264, 22.602, 26.165,
@@ -95,15 +95,15 @@ function dnorm(x)
 }
 
 // calculate density estimate
-function densityEstimate(data, bw, xMin, xMax, nPoints)
+function densityEstimate(data, bw, minx, maxx, numPoints)
 {
   var xy = new Array(2);
   for(var i=0; i < nPoints; i++) {
-    xy[i] = [xMin + (xMax-xMin)*i/nPoints, 0];
+    xy[i] = [minx + (maxx-minx)*i/numPoints, 0];
   }
-  for(var i=0; i<nPoints; i++) {
+  for(var i=0; i<numPoints; i++) {
     for(var j=0; j < data.length; j++) {
-      xy[i][1] += dnorm((xy[i][0]-dat[j])/bw)/bw/data.length;
+      xy[i][1] += dnorm((xy[i][0]-data[j])/bw)/bw/data.length;
     }
   }
   return xy;
@@ -191,7 +191,7 @@ var onedigit = d3.format(".1f");
        .attr("fill", "none")
        .attr("stroke","slateblue")
        .attr("stroke-width", 3)
-       .attr("d", line(densityEstimate(dat, bandwidth, xMin, xMax, nPoints)));
+       .attr("d", line(densityEstimate(mixData, bandwidth, xMin, xMax, nPoints)));
 
   var bwtext = d3.select("body").selectAll("#bandwidth")
     .data([ bandwidth ]);
@@ -199,7 +199,7 @@ var onedigit = d3.format(".1f");
   d3.select("input[type=range]").on("change", function() {
        bandwidth = Math.pow(10, this.value);
 
-       path.transition().attr("d", line(densityEstimate(dat, bandwidth, xMin, xMax, nPoints)));
+       path.transition().attr("d", line(densityEstimate(mixData, bandwidth, xMin, xMax, nPoints)));
 
        if(bandwidth > 0.095)
          bwtext.transition().text("Bandwidth = " + twodigits(bandwidth));
