@@ -88,11 +88,13 @@ var nPoints = 250;
 var xMin = 10;
 var xMax = 50;
 
+// standard normal density function
 function dnorm(x)
 {
   return Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI);
 }
 
+// calculate density estimate
 function densityEstimate(data, bw, xMin, xMax, nPoints)
 {
   var xy = new Array(2);
@@ -107,7 +109,7 @@ function densityEstimate(data, bw, xMin, xMax, nPoints)
   return xy;
 }
 
-var xy = densityEstimate(dat, bandwidth, xMin, xMax, nPoints);
+
 
 var w=800, h=400;
 var pad = {bottom:50, left:50, top:3, right:3, internal:5}
@@ -189,7 +191,7 @@ var onedigit = d3.format(".1f");
        .attr("fill", "none")
        .attr("stroke","slateblue")
        .attr("stroke-width", 3)
-       .attr("d", line(xy))
+       .attr("d", line(densityEstimate(dat, bandwidth, xMin, xMax, nPoints)));
 
   var bwtext = d3.select("body").selectAll("#bandwidth")
     .data([ bandwidth ]);
@@ -197,8 +199,7 @@ var onedigit = d3.format(".1f");
   d3.select("input[type=range]").on("change", function() {
        bandwidth = Math.pow(10, this.value);
 
-       xy = densityEstimate(dat, bandwidth, xMin, xMax, nPoints);
-       path.transition().attr("d", line(xy));
+       path.transition().attr("d", line(densityEstimate(dat, bandwidth, xMin, xMax, nPoints)));
 
        if(bandwidth > 0.095)
          bwtext.transition().text("Bandwidth = " + twodigits(bandwidth));
