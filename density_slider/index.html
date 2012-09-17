@@ -22,11 +22,12 @@
 
 <h3 style="font-family:sans-serif">Scatterplot with slider</h3>
 
-<div style="font-size:14px;font-family:sans-serif">Bandwidth:
-    <input style="position:relative;top:4px;" type="range" min="-2" max="1" step = "0.1" value="0">
-</div>
-
 <div id="chart" style="position:relative;top:10px;"></div>
+
+<div style="font-size:14px;font-family:sans-serif">
+<p id="bandwidth">Bandwidth = 1.0</p>
+<input style="position:relative;top:4px;" type="range" min="-2" max="1" step = "0.05" value="0">
+</div>
 
 <script type="text/javascript">
 (function(){
@@ -187,9 +188,15 @@ var onedigit = d3.format(".1f");
        .attr("stroke-width", 3)
        .attr("d", line(xy))
 
+  var bwtext = d3.select("body").selectAll("p")
+    .data([ bandwidth ]);
+
   d3.select("input[type=range]").on("change", function() {
        xy = densityEstimate(dat, Math.pow(10, this.value), xMin, xMax, nPoints);
        path.transition().attr("d", line(xy));
+
+       bwtext.transition().text("Bandwidth = " + String(Math.pow(10, this.value)));
+
      });
 
 })();
