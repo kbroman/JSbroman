@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<style>
+.highlight {
+  color: rgb(125,250,125);
+}
+
+.glow {
+  color: rgb(175,255,175);
+  text-shadow: 0 0 50px #0af, 0 0 3px #fff;
+}
+
+body {
+  height: 960px;
+  width: 1280px;
+  background-color: black;
+}
+
+h2 {
+  font-size: 38px;
+}
+</style>
+
+<script src="http://d3js.org/d3.v2.min.js"></script>
+
+<title>Flashing neon text</title>
+</head>
+<body>
+
+<h2 class="highlight">It's easy to make text
+<font id="flash" class="glow">interactive</font>, once you know how.</h2>
+
+<script src="flashing_neon.js"></script>
+</body>
+</html>

@@ -4,3 +4,4 @@ Rout.txt
 *.json
 *.csv
 density_coffee/*.js
+flashing_neon_coffee/*.js
