@@ -1,6 +1,6 @@
 # plot recombination fractions/LOD scores for all pairs of chromosomes
 
-margin = {top: 100, right: 100, bottom: 100, left:100}
+margin = {top: 25, right: 25, bottom: 10, left:50}
 width = 720
 height = 720
 zmax = 12 # maximum LOD score
@@ -203,7 +203,7 @@ d3.json("rf.json", (rfdata) ->
       .attr("class", "axis")
       .attr("id", "xlab")
       .attr("x", (d) -> (xscale(d.lo)+xscale(d.hi)+xscale.rangeBand())/2)
-      .attr("y", -5)
+      .attr("y", -margin.top*0.4)
       .attr("text-anchor", "middle")
       .text((d) -> d.chr)
 
@@ -214,7 +214,7 @@ d3.json("rf.json", (rfdata) ->
       .attr("class", "axis")
       .attr("id", "ylab")
       .attr("y", (d) -> (yscale(d.hi)+yscale(d.lo))/2+yscale.rangeBand())
-      .attr("x", width+10)
+      .attr("x", width+margin.right*0.4)
       .attr("text-anchor", "middle")
       .text((d) -> d.chr)
 
