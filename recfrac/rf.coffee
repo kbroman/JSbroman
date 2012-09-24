@@ -1,11 +1,12 @@
 # plot recombination fractions/LOD scores for all pairs of chromosomes
 
-margin = {top: 160, right: 10, bottom: 10, left:160}
+margin = {top: 100, right: 100, bottom: 100, left:100}
 width = 720
 height = 720
 zmax = 12 # maximum LOD score
 
 log2 = (x) -> Math.log(x)/Math.log(2.0)
+onedigit = d3.format ".1f"
 
 rf = []
 chr = []
@@ -40,9 +41,9 @@ d3.json("rf.json", (rfdata) ->
 
   # plug in -1 for nulls
   rf.forEach((cell) -> cell.value = -1 if cell.value is null)
-       
+
   # threshold the values and transform recombination fractions
-  rf.forEach((cell) -> 
+  rf.forEach((cell) ->
     cell.state = 0
     if cell.value is null
       cell.value = 0.5 if cell.row < cell.col
@@ -55,8 +56,8 @@ d3.json("rf.json", (rfdata) ->
         cell.value = 0.5 if cell.value > 0.5
         cell.value = -4*(log2(cell.value)+1)/12*zmax
     cell.value = zmax if cell.value > zmax
-  )    
-        
+  )
+
   # the pixels
   cells = svg.selectAll(".cell")
       .data(rf)
@@ -74,20 +75,80 @@ d3.json("rf.json", (rfdata) ->
 
   cells.on("mouseout", ->
     d3.select(this).style("stroke","none"))
-  
+
+  cells.on("click", (d) ->
+    d3.selectAll("#tooltip").transition().duration(500).attr("opacity",0).remove()
+    svg.append("text")
+        .text(->
+          if d.row is d.col
+            markers[d.row-1].marker
+          else
+            "#{markers[d.row-1].marker} : #{markers[d.col-1].marker}    value = #{onedigit(d.value)}"
+        )
+        .attr("id", "tooltip")
+        .style("font-family", "sans-serif")
+        .attr("text-anchor", ->
+          if d.row < nmar/2
+            "start"
+          else
+            "end"
+        )
+        .attr("x", ->
+          if d.row < nmar/2
+            xscale(d.row-1)+xscale.rangeBand()*1.5
+          else
+            xscale(d.row-1)-xscale.rangeBand()/2
+        )
+        .attr("y", yscale(d.col-1)+yscale.rangeBand())
+  )
+
+
   # add black border
-  border = svg.append("rect")
+  svg.append("rect")
       .attr("class", "border")
       .attr("width", width)
       .attr("height", height)
 
-  chrborder = svg.selectAll("#chr")
+  # add horizontal lines at chromosome boundaries
+  svg.selectAll("#hchr")
       .data(chr)
-    .enter().append("rect")
+    .enter().append("line")
       .attr("class", "border")
-      .attr("id", "chr")
-      .attr("x", (d) -> xscale(d.lo-1))
-      .attr("y", (d) -> yscale(d.hi-1))
-      .attr("width", (d) -> xscale.rangeBand()*d.nmar)
-      .attr("height", (d) -> yscale.rangeBand()*d.nmar)
+      .attr("id", "hchr")
+      .attr("x1", (d) -> 0)
+      .attr("x2", (d) -> width)
+      .attr("y1", (d) -> yscale(d.hi-1))
+      .attr("y2", (d) -> yscale(d.hi-1))
+
+  # add vertical lines at chromosome boundaries
+  svg.selectAll("#vchr")
+      .data(chr)
+    .enter().append("line")
+      .attr("class", "border")
+      .attr("id", "vchr")
+      .attr("x1", (d) -> xscale(d.hi))
+      .attr("x2", (d) -> xscale(d.hi))
+      .attr("y1", (d) -> 0)
+      .attr("y2", (d) -> height)
+
+  svg.selectAll("#xlab")
+      .data(chr)
+    .enter().append("text")
+      .attr("class", "axis")
+      .attr("id", "xlab")
+      .attr("x", (d) -> (xscale(d.lo-1)+xscale(d.hi-1)+xscale.rangeBand())/2)
+      .attr("y", -5)
+      .attr("text-anchor", "middle")
+      .text((d) -> d.chr)
+
+  svg.selectAll("#ylab")
+      .data(chr)
+    .enter().append("text")
+      .attr("class", "axis")
+      .attr("id", "ylab")
+      .attr("y", (d) -> (yscale(d.hi-1)+yscale(d.lo-1))/2+yscale.rangeBand())
+      .attr("x", width+10)
+      .attr("text-anchor", "middle")
+      .text((d) -> d.chr)
+
 )
