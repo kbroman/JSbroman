@@ -95,13 +95,13 @@ d3.json("rf.json", (rfdata) ->
     svg.selectAll("##{label}").style("stroke","red"))
 
   cells.on("mouseout", ->
+    d3.selectAll("#tooltip").remove()
     d3.select(this).style("stroke","none")
     label = reverselabels(this.id)
     console.log("#{this.id} #{label}")
     svg.selectAll("##{label}").style("stroke","none"))
 
   cells.on("click", (d) ->
-    d3.selectAll("#tooltip").transition().duration(500).attr("opacity",0).remove()
     svg.append("text")
         .text(->
           if d.row is d.col
