@@ -19,7 +19,7 @@ function(cross, chr, file = "rf.json")
 
   # marker and numeric indices
   mnames <- markernames(cross)
-  index <- 1:length(mnames)
+  index <- 1:length(mnames)-1
 
   # turn into JSON-type string
   mnames <- paste("\"marker\":\"", mnames, "\",", sep="")
@@ -29,8 +29,8 @@ function(cross, chr, file = "rf.json")
   # chromosome names, lo and high indices
   chrnames <- names(cross$geno)
   n.mar <- nmar(cross)
-  lo <- cumsum(c(1,nmar(cross)))[1:nchr(cross)]
-  hi <- cumsum(c(0,nmar(cross)))[-1]
+  lo <- cumsum(c(1,nmar(cross)))[1:nchr(cross)]-1
+  hi <- cumsum(c(0,nmar(cross)))[-1]-1
 
   # turn into JSON-type string
   chrnames <- paste("\"chr\":\"", chrnames, "\",", sep="")
@@ -43,8 +43,8 @@ function(cross, chr, file = "rf.json")
   value <- as.character(rf)
   value[is.na(value) | value == "NaN"] <- "null"
   value <- paste("\"value\":", value, sep="")
-  rowindex <- paste("\"row\":", row(rf), ",", sep="")
-  colindex <- paste("\"col\":", col(rf), ",", sep="")
+  rowindex <- paste("\"row\":", row(rf)-1, ",", sep="")
+  colindex <- paste("\"col\":", col(rf)-1, ",", sep="")
   rf <- paste("[", paste(paste("{", rowindex, colindex, value, "}", sep=""), collapse=",\n    "), "]")
 
   cat("{\"markers\":", markers, ",\n",

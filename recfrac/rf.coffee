@@ -63,8 +63,8 @@ d3.json("rf.json", (rfdata) ->
       .data(rf)
     .enter().append("rect")
       .attr("class", "cell")
-      .attr("x", (d) -> xscale(d.row-1))
-      .attr("y", (d) -> yscale(d.col-1))
+      .attr("x", (d) -> xscale(d.row))
+      .attr("y", (d) -> yscale(d.col))
       .attr("width", xscale.rangeBand())
       .attr("height", yscale.rangeBand())
       .attr("id", (d) -> "#{d.row}_#{d.col}")
@@ -81,9 +81,9 @@ d3.json("rf.json", (rfdata) ->
     svg.append("text")
         .text(->
           if d.row is d.col
-            markers[d.row-1].marker
+            markers[d.row].marker
           else
-            "#{markers[d.row-1].marker} : #{markers[d.col-1].marker}    value = #{onedigit(d.value)}"
+            "#{markers[d.row].marker} : #{markers[d.col].marker}    value = #{onedigit(d.value)}"
         )
         .attr("id", "tooltip")
         .style("font-family", "sans-serif")
@@ -95,11 +95,11 @@ d3.json("rf.json", (rfdata) ->
         )
         .attr("x", ->
           if d.row < nmar/2
-            xscale(d.row-1)+xscale.rangeBand()*1.5
+            xscale(d.row)+xscale.rangeBand()*1.5
           else
-            xscale(d.row-1)-xscale.rangeBand()/2
+            xscale(d.row)-xscale.rangeBand()/2
         )
-        .attr("y", yscale(d.col-1)+yscale.rangeBand())
+        .attr("y", yscale(d.col)+yscale.rangeBand())
   )
 
 
@@ -117,8 +117,8 @@ d3.json("rf.json", (rfdata) ->
       .attr("id", "hchr")
       .attr("x1", (d) -> 0)
       .attr("x2", (d) -> width)
-      .attr("y1", (d) -> yscale(d.hi-1))
-      .attr("y2", (d) -> yscale(d.hi-1))
+      .attr("y1", (d) -> yscale(d.hi))
+      .attr("y2", (d) -> yscale(d.hi))
 
   # add vertical lines at chromosome boundaries
   svg.selectAll("#vchr")
@@ -126,8 +126,8 @@ d3.json("rf.json", (rfdata) ->
     .enter().append("line")
       .attr("class", "border")
       .attr("id", "vchr")
-      .attr("x1", (d) -> xscale(d.hi))
-      .attr("x2", (d) -> xscale(d.hi))
+      .attr("x1", (d) -> xscale(d.hi+1))
+      .attr("x2", (d) -> xscale(d.hi+1))
       .attr("y1", (d) -> 0)
       .attr("y2", (d) -> height)
 
@@ -136,7 +136,7 @@ d3.json("rf.json", (rfdata) ->
     .enter().append("text")
       .attr("class", "axis")
       .attr("id", "xlab")
-      .attr("x", (d) -> (xscale(d.lo-1)+xscale(d.hi-1)+xscale.rangeBand())/2)
+      .attr("x", (d) -> (xscale(d.lo)+xscale(d.hi)+xscale.rangeBand())/2)
       .attr("y", -5)
       .attr("text-anchor", "middle")
       .text((d) -> d.chr)
@@ -146,7 +146,7 @@ d3.json("rf.json", (rfdata) ->
     .enter().append("text")
       .attr("class", "axis")
       .attr("id", "ylab")
-      .attr("y", (d) -> (yscale(d.hi-1)+yscale(d.lo-1))/2+yscale.rangeBand())
+      .attr("y", (d) -> (yscale(d.hi)+yscale(d.lo))/2+yscale.rangeBand())
       .attr("x", width+10)
       .attr("text-anchor", "middle")
       .text((d) -> d.chr)
