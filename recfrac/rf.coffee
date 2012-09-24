@@ -115,6 +115,7 @@ d3.json("rf.json", (rfdata) ->
   )
 
   cells.on("mouseout", ->
+    d3.selectAll("#tooltip").remove()
     hilit[0].remove()
     hilit[1].remove()
   )
