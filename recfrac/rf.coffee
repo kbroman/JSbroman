@@ -21,6 +21,8 @@ xscale = []
 yscale = []
 zscale = []
 matrix = []
+hilit = []
+
 
 
 # create SVG element and shift it down and to right
@@ -89,17 +91,33 @@ d3.json("rf.json", (rfdata) ->
       .style("fill", (d) -> zscale(d.value))
 
   cells.on("mouseover", ->
-    d3.select(this).style("stroke","green")
-    label = reverselabels(this.id)
-    console.log("#{this.id} #{label}")
-    svg.selectAll("##{label}").style("stroke","red"))
+    x = d3.select(this).attr("x")
+    y = d3.select(this).attr("y")
+    hilit = [svg.append("rect")
+        .attr("id", "highlightrect")
+        .attr("x", x)
+        .attr("y", y)
+        .attr("width", xscale.rangeBand())
+        .attr("height", yscale.rangeBand())
+        .style("fill", "none")
+        .style("stroke","green")
+        .style("stroke-width", "3"),
+       svg.append("rect")
+        .attr("id", "highlightrect")
+        .attr("x", width-y)
+        .attr("y", height-x)
+        .attr("width", xscale.rangeBand())
+        .attr("height", yscale.rangeBand())
+        .style("fill", "none")
+        .style("stroke","red")
+        .style("stroke-width", "3")]
+    console.log("#{x} #{y}")
+  )
 
   cells.on("mouseout", ->
-    d3.selectAll("#tooltip").remove()
-    d3.select(this).style("stroke","none")
-    label = reverselabels(this.id)
-    console.log("#{this.id} #{label}")
-    svg.selectAll("##{label}").style("stroke","none"))
+    hilit[0].remove()
+    hilit[1].remove()
+  )
 
   cells.on("click", (d) ->
     svg.append("text")
