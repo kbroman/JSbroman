@@ -131,6 +131,7 @@ d3.json("rf.json", (rfdata) ->
       .attr("y1", (d) -> 0)
       .attr("y2", (d) -> height)
 
+  # chromosome labels above
   svg.selectAll("#xlab")
       .data(chr)
     .enter().append("text")
@@ -141,6 +142,7 @@ d3.json("rf.json", (rfdata) ->
       .attr("text-anchor", "middle")
       .text((d) -> d.chr)
 
+  # chromosome labels on right
   svg.selectAll("#ylab")
       .data(chr)
     .enter().append("text")
