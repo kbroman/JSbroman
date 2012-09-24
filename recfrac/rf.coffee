@@ -57,12 +57,6 @@ d3.json("rf.json", (rfdata) ->
     cell.value = zmax if cell.value > zmax
   )    
         
-#  # background rectangle
-#  svg.append("rect")
-#      .attr("id", "bgrect")
-#      .attr("width", width)
-#      .attr("height", height)
-
   # the pixels
   cells = svg.selectAll(".cell")
       .data(rf)
