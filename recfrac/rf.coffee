@@ -92,13 +92,13 @@ d3.json("rf.json", (rfdata) ->
     d3.select(this).style("stroke","green")
     label = reverselabels(this.id)
     console.log("#{this.id} #{label}")
-    d3.select("rect ##{label}").style("stroke","red"))
+    svg.selectAll("##{label}").style("stroke","red"))
 
   cells.on("mouseout", ->
     d3.select(this).style("stroke","none")
     label = reverselabels(this.id)
     console.log("#{this.id} #{label}")
-    d3.select("rect ##{label}").style("stroke","none"))
+    svg.selectAll("##{label}").style("stroke","none"))
 
   cells.on("click", (d) ->
     d3.selectAll("#tooltip").transition().duration(500).attr("opacity",0).remove()
@@ -107,7 +107,7 @@ d3.json("rf.json", (rfdata) ->
           if d.row is d.col
             markers[d.row].marker
           else
-            "#{markers[d.row].marker} : #{markers[d.col].marker}    rf = #{twodigits(matrix[d.row][d.col].rf)}    lod = #{onedigit(matrix[d.row][d.col].lod)}"
+            "#{markers[d.row].marker} : #{markers[d.col].marker}"
         )
         .attr("id", "tooltip")
         .style("font-family", "sans-serif")
@@ -124,6 +124,26 @@ d3.json("rf.json", (rfdata) ->
             xscale(d.row)-xscale.rangeBand()/2
         )
         .attr("y", yscale(d.col)+yscale.rangeBand())
+    if d.row != d.col
+      svg.append("text")
+          .text(->
+              "rf = #{twodigits(matrix[d.row][d.col].rf)}    lod = #{onedigit(matrix[d.row][d.col].lod)}"
+          )
+          .attr("id", "tooltip")
+          .style("font-family", "sans-serif")
+          .attr("text-anchor", ->
+            if d.col < nmar/2
+              "start"
+            else
+              "end"
+          )
+          .attr("x", ->
+            if d.col < nmar/2
+              xscale(d.col)+xscale.rangeBand()*1.5
+            else
+              xscale(d.col)-xscale.rangeBand()/2
+          )
+          .attr("y", yscale(d.row)+yscale.rangeBand())
   )
 
 
