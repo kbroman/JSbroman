@@ -7,6 +7,11 @@ zmax = 12 # maximum LOD score
 
 log2 = (x) -> Math.log(x)/Math.log(2.0)
 onedigit = d3.format ".1f"
+twodigits = d3.format ".2f"
+reverselabels = (label) ->
+  rc = label.split("c")
+  tmp = rc[0].split("r")
+  ["r", rc[1], "c", tmp[1]].join("")
 
 rf = []
 chr = []
@@ -15,6 +20,7 @@ cells = []
 xscale = []
 yscale = []
 zscale = []
+matrix = []
 
 
 # create SVG element and shift it down and to right
@@ -39,6 +45,18 @@ d3.json("rf.json", (rfdata) ->
   # scale for pixel color (orange indicates missing values)
   zscale = d3.scale.linear().domain([-1, 0, zmax]).range(["orange", "white", "blue"])
 
+  # create matrix of rec fracs and LODs
+  for i in [0...nmar]
+    matrix[i] = d3.range(nmar).map((j) -> {rf: null, lod:null})
+
+  rf.forEach((cell) ->
+    if cell.row > cell.col
+      matrix[cell.row][cell.col].rf = cell.value
+      matrix[cell.col][cell.row].rf = cell.value
+    else if cell.row < cell.col
+      matrix[cell.row][cell.col].lod = cell.value
+      matrix[cell.col][cell.row].lod = cell.value)
+
   # plug in -1 for nulls
   rf.forEach((cell) -> cell.value = -1 if cell.value is null)
 
@@ -55,8 +73,8 @@ d3.json("rf.json", (rfdata) ->
       if cell.value != -1
         cell.value = 0.5 if cell.value > 0.5
         cell.value = -4*(log2(cell.value)+1)/12*zmax
-    cell.value = zmax if cell.value > zmax
-  )
+    cell.value = zmax if cell.value > zmax)
+
 
   # the pixels
   cells = svg.selectAll(".cell")
@@ -67,14 +85,20 @@ d3.json("rf.json", (rfdata) ->
       .attr("y", (d) -> yscale(d.col))
       .attr("width", xscale.rangeBand())
       .attr("height", yscale.rangeBand())
-      .attr("id", (d) -> "#{d.row}_#{d.col}")
+      .attr("id", (d) -> "r#{d.row}c#{d.col}")
       .style("fill", (d) -> zscale(d.value))
 
   cells.on("mouseover", ->
-    d3.select(this).style("stroke","orange").style("stroke-width", 2))
+    d3.select(this).style("stroke","green")
+    label = reverselabels(this.id)
+    console.log("#{this.id} #{label}")
+    d3.select("rect ##{label}").style("stroke","red"))
 
   cells.on("mouseout", ->
-    d3.select(this).style("stroke","none"))
+    d3.select(this).style("stroke","none")
+    label = reverselabels(this.id)
+    console.log("#{this.id} #{label}")
+    d3.select("rect ##{label}").style("stroke","none"))
 
   cells.on("click", (d) ->
     d3.selectAll("#tooltip").transition().duration(500).attr("opacity",0).remove()
@@ -83,7 +107,7 @@ d3.json("rf.json", (rfdata) ->
           if d.row is d.col
             markers[d.row].marker
           else
-            "#{markers[d.row].marker} : #{markers[d.col].marker}    value = #{onedigit(d.value)}"
+            "#{markers[d.row].marker} : #{markers[d.col].marker}    rf = #{twodigits(matrix[d.row][d.col].rf)}    lod = #{onedigit(matrix[d.row][d.col].lod)}"
         )
         .attr("id", "tooltip")
         .style("font-family", "sans-serif")
