@@ -119,7 +119,9 @@ d3.json("../recfrac/rf.json", (rfdata) ->
     hilit[0].remove()
     hilit[1].remove()
 
-  cells.on("click", (d) ->
+  cells.on("click", (d) -> click(d))
+
+  click = (d) ->
     svg.append("text")
         .text(->
           if d.row is d.col
@@ -162,8 +164,6 @@ d3.json("../recfrac/rf.json", (rfdata) ->
               xscale(d.col)-xscale.rangeBand()/2
           )
           .attr("y", yscale(d.row)+yscale.rangeBand())
-  )
-
 
   # add black border
   svg.append("rect")
