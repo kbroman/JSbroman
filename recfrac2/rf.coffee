@@ -1,8 +1,9 @@
 # plot recombination fractions/LOD scores for all pairs of chromosomes
 
 margin = {top: 25, right: 25, bottom: 10, left:50}
-width = 720
+lwidth = 720
 height = 720
+rwidth = 400
 zmax = 12 # maximum LOD score
 
 log2 = (x) -> Math.log(x)/Math.log(2.0)
@@ -27,7 +28,7 @@ hilit = []
 
 # create SVG element and shift it down and to right
 svg = d3.select("body").selectAll("#rf").append("svg")
-    .attr("width", width + margin.left + margin.right)
+    .attr("width", lwidth + 2*margin.left + 2*margin.right + rwidth)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(#{margin.left},#{margin.top})")
@@ -41,7 +42,7 @@ d3.json("../recfrac/rf.json", (rfdata) ->
   rf = rfdata.rf
 
   # scales for pixels
-  xscale = d3.scale.ordinal().domain(d3.range(nmar)).rangeBands([0, width])
+  xscale = d3.scale.ordinal().domain(d3.range(nmar)).rangeBands([0, lwidth])
   yscale = d3.scale.ordinal().domain(d3.range(nmar)).rangeBands([height, 0])
 
   # scale for pixel color (orange indicates missing values)
@@ -77,7 +78,6 @@ d3.json("../recfrac/rf.json", (rfdata) ->
         cell.value = -4*(log2(cell.value)+1)/12*zmax
     cell.value = zmax if cell.value > zmax)
 
-
   # the pixels
   cells = svg.selectAll(".cell")
       .data(rf)
@@ -89,6 +89,16 @@ d3.json("../recfrac/rf.json", (rfdata) ->
       .attr("height", yscale.rangeBand())
       .attr("id", (d) -> "r#{d.row}c#{d.col}")
       .style("fill", (d) -> zscale(d.value))
+
+
+  # area on right, top, containing info on marker pair, rec frac, and LOD
+  temp = lwidth+margin.left+margin.right
+  xrscale = d3.scale.linear().domain([0, 100]).range([temp, temp+rwidth])
+  rtheight = (height-margin.top-margin.bottom)*0.4
+  rbheight = (height - margin.top - margin.bottom) - rtheight
+  yrtscale = d3.scale.linear().domain([0, 100]).range([rtheight, 0])
+  temp = rtheight + margin.top + margin.bottom
+  yrbscale = d3.scale.linear().domain([0, 100]).range([rbheight+temp, temp])
 
   cells.on("mouseover", (d) -> mouseover(d))
 
@@ -115,7 +125,7 @@ d3.json("../recfrac/rf.json", (rfdata) ->
   cells.on("mouseout", -> mouseout())
 
   mouseout = ->
-    svg.selectAll("#tooltip").remove()
+    d3.selectAll("#tooltip").remove()
     hilit[0].remove()
     hilit[1].remove()
 
@@ -168,8 +178,24 @@ d3.json("../recfrac/rf.json", (rfdata) ->
   # add black border
   svg.append("rect")
       .attr("class", "border")
-      .attr("width", width)
+      .attr("width", lwidth)
       .attr("height", height)
+
+  # black border on right top
+  svg.append("rect")
+      .attr("class", "border")
+      .attr("x", xrscale(0))
+      .attr("y", yrtscale(100))
+      .attr("width", rwidth)
+      .attr("height", rtheight)
+
+  # black border on right bottom
+  svg.append("rect")
+      .attr("class", "border")
+      .attr("x", xrscale(0))
+      .attr("y", yrbscale(100))
+      .attr("width", rwidth)
+      .attr("height", rbheight)
 
   # add horizontal lines at chromosome boundaries
   svg.selectAll("#hchr")
@@ -178,7 +204,7 @@ d3.json("../recfrac/rf.json", (rfdata) ->
       .attr("class", "border")
       .attr("id", "hchr")
       .attr("x1", (d) -> 0)
-      .attr("x2", (d) -> width)
+      .attr("x2", (d) -> lwidth)
       .attr("y1", (d) -> yscale(d.hi))
       .attr("y2", (d) -> yscale(d.hi))
 
@@ -211,7 +237,7 @@ d3.json("../recfrac/rf.json", (rfdata) ->
       .attr("class", "axis")
       .attr("id", "ylab")
       .attr("y", (d) -> (yscale(d.hi)+yscale(d.lo))/2+yscale.rangeBand())
-      .attr("x", width+margin.right*0.4)
+      .attr("x", lwidth+margin.right*0.4)
       .attr("text-anchor", "middle")
       .text((d) -> d.chr)
 
