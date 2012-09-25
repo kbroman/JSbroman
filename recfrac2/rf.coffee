@@ -33,7 +33,7 @@ svg = d3.select("body").selectAll("#rf").append("svg")
     .attr("transform", "translate(#{margin.left},#{margin.top})")
 
 
-d3.json("rf.json", (rfdata) ->
+d3.json("../recfrac/rf.json", (rfdata) ->
   markers = rfdata.markers
   nmar = markers.length
   chr = rfdata.chr
@@ -90,16 +90,13 @@ d3.json("rf.json", (rfdata) ->
       .attr("id", (d) -> "r#{d.row}c#{d.col}")
       .style("fill", (d) -> zscale(d.value))
 
-  cells.on("mouseover", ->
-    x = d3.select(this).attr("x")
-    y = d3.select(this).attr("y")
-    that = svg.select("##{reverselabels(this.id)}")
-    xr = that.attr("x")
-    yr = that.attr("y")
+  cells.on("mouseover", (d) -> mouseover(d))
+
+  mouseover = (d) ->
     hilit = [svg.append("rect")
         .attr("id", "hilit")
-        .attr("x", xr-2)
-        .attr("y", yr-2)
+        .attr("x", xscale(d.col)-2)
+        .attr("y", yscale(d.row)-2)
         .attr("width", xscale.rangeBand()+4)
         .attr("height", yscale.rangeBand()+4)
         .style("fill", "none")
@@ -107,14 +104,13 @@ d3.json("rf.json", (rfdata) ->
         .style("stroke-width", "3"),
       svg.append("rect")
         .attr("id", "hilit")
-        .attr("x", x-2)
-        .attr("y", y-2)
+        .attr("x", xscale(d.row)-2)
+        .attr("y", yscale(d.col)-2)
         .attr("width", xscale.rangeBand()+4)
         .attr("height", yscale.rangeBand()+4)
         .style("fill", "none")
         .style("stroke","green")
         .style("stroke-width", "3")]
-  )
 
   cells.on("mouseout", ->
     d3.selectAll("#tooltip").remove()
