@@ -121,15 +121,48 @@ d3.json("../recfrac/rf.json", (rfdata) ->
         .style("fill", "none")
         .style("stroke","green")
         .style("stroke-width", "3")]
+    addInfobox(d)
+
+  infobox = []
+  addInfobox = (d) ->
+    infobox = svg.append("g")
+        .attr("id", "infobox")
+    infobox.append("text")
+        .attr("x", xrscale(45))
+        .attr("y", yrtscale(65))
+        .text(markers[d.row].marker)
+        .attr("text-anchor", "end")
+    infobox.append("text")
+        .attr("x", xrscale(50))
+        .attr("y", yrtscale(65))
+        .text(":")
+        .attr("text-anchor", "middle")
+    infobox.append("text")
+        .attr("x", xrscale(55))
+        .attr("y", yrtscale(65))
+        .text(markers[d.col].marker)
+        .attr("text-anchor", "start")
+    infobox.append("text")
+        .attr("x", xrscale(50))
+        .attr("y", yrtscale(45))
+        .text("rec frac = #{twodigits(matrix[d.row][d.col].rf)}")
+        .attr("text-anchor", "middle")
+    infobox.append("text")
+        .attr("x", xrscale(50))
+        .attr("y", yrtscale(30))
+        .text("LOD score = #{onedigit(matrix[d.row][d.col].lod)}")
+        .attr("text-anchor", "middle")
+
 
   cells.on("mouseout", -> mouseout())
 
   mouseout = ->
+    infobox.remove()
     d3.selectAll("#tooltip").remove()
     hilit[0].remove()
     hilit[1].remove()
 
-  cells.on("click", (d) -> click(d))
+#  cells.on("click", (d) -> click(d))
 
   click = (d) ->
     svg.append("text")
