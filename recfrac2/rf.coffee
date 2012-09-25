@@ -112,11 +112,12 @@ d3.json("../recfrac/rf.json", (rfdata) ->
         .style("stroke","green")
         .style("stroke-width", "3")]
 
-  cells.on("mouseout", ->
-    d3.selectAll("#tooltip").remove()
+  cells.on("mouseout", -> mouseout())
+
+  mouseout = ->
+    svg.selectAll("#tooltip").remove()
     hilit[0].remove()
     hilit[1].remove()
-  )
 
   cells.on("click", (d) ->
     svg.append("text")
