@@ -160,3 +160,20 @@ z = (-xv for xv of x)
 console.log x
 console.log y
 console.log z
+
+####################
+### multi-assignments
+####################
+console.log '\n## multi-assignments ##'
+
+[a, b] = [5, 8]
+console.log a,b
+[a, b] = [b, a]
+console.log a,b
+
+rect =
+  x: 100
+  y: 200
+{x, y} = rect
+console.log "x = #{x}"
+console.log "y = #{y}"
