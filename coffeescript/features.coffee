@@ -37,15 +37,15 @@ console.log "for i,j of list"
 for i,j of list
   console.log "i = #{i}, j=#{j}"
 
-# for..of rather than for..in
+# for..in
 console.log "for i in list"
 for i in list
   console.log "i = #{i}"
 
-# for..of rather than for..in
-console.log "for i of list"
-for i of list
-  console.log "i = #{i}"
+# for..of
+console.log "for j of list"
+for j of list
+  console.log "j = #{j}"
 
 ####################
 ### strings and splats
