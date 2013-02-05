@@ -15,8 +15,10 @@ draw = (data) ->
              .range([pad, w-pad])
 
   yScale = d3.scale.linear()
-             .domain([-1, 1])
+             .domain([-1.1, 1.1])
              .range([h-pad, pad])
+
+  axisFormat = d3.format(".2f")
 
   quline = (j) ->
     d3.svg.line()
@@ -32,10 +34,41 @@ draw = (data) ->
      .attr("y", pad)
      .attr("height", h-2*pad)
      .attr("width", w-2*pad)
-     .attr("class", "line")
      .attr("stroke", "black")
-     .attr("stroke-width", 3)
+     .attr("stroke-width", 2)
+     .attr("fill", d3.rgb(200, 200, 200))
 
+  svg.selectAll("line.axis")
+     .data([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
+     .enter()
+     .append("line")
+     .attr("class", "line")
+     .attr("class", "axis")
+     .attr("x1", pad)
+     .attr("x2", w-pad)
+     .attr("y1", (d) -> yScale(d))
+     .attr("y2", (d) -> yScale(d))
+     .attr("stroke", "white")
+
+  svg.selectAll("text.axis")
+     .data([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
+     .enter()
+     .append("text")
+     .attr("class", "axis")
+     .text((d) -> axisFormat(d))
+     .attr("x", pad*0.9)
+     .attr("y", (d) -> yScale(d))
+     .attr("dominant-baseline", "middle")
+     .attr("text-anchor", "end")
+
+  svg.append("rect")
+     .attr("x", pad)
+     .attr("y", pad)
+     .attr("height", h-2*pad)
+     .attr("width", w-2*pad)
+     .attr("stroke", "black")
+     .attr("stroke-width", 2)
+     .attr("fill", "none")
 
   colors = ["blue", "green", "orange", "red", "black"]
   for j in [3..0]
@@ -73,9 +106,10 @@ draw = (data) ->
        .attr("class", "qu")
        .text( (d) -> "#{d*100}%")
        .attr("x", w-pad*0.1)
-       .attr("y", (d,i) -> h*(1 - (i+2)/(data.qu.length+3)))
+       .attr("y", (d,i) -> yScale((i+0.5)/nQuant - 0.5))
        .attr("fill", (d,i) -> colors[i])
        .attr("text-anchor", "end")
+       .attr("dominant-baseline", "middle")
 
 
 # load json file and call draw function
