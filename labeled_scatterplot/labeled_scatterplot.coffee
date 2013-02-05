@@ -66,7 +66,6 @@ svg.selectAll("text")
     return xv+8 if xv < w*0.8
     xv-8)
   .attr("y", (d) -> yScale(d.y))
-  .attr("font-family", "arial")
   .attr("dominant-baseline", "middle")
   .attr("text-anchor", (d) ->
     xv = xScale(d.x)
