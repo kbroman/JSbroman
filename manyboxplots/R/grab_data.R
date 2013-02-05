@@ -6,7 +6,7 @@ load("~/Projects/Attie/GoldStandard/Expression/MLRatios/F2.mlratio.hypo.RData")
 # hypo.mlratio is dimension 40572 (transcripts) x 494 (mice)
 
 # calculate quantiles
-qu <- c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999)
+qu <- c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99)
 quant <- apply(hypo.mlratio, 2, quantile, qu, na.rm=TRUE)
 ord <- rev(order(quant[5,])) # ordered array indices, by array medians
 
