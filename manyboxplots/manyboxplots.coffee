@@ -4,7 +4,7 @@ draw = (data) ->
   # dimensions of SVG
   w = 1000
   h = 500
-  pad = 20
+  pad = 40
 
   # number of quantiles
   nQuant = data.quant.length
@@ -32,37 +32,21 @@ draw = (data) ->
      .attr("y", pad)
      .attr("height", h-2*pad)
      .attr("width", w-2*pad)
-     .attr("fill", "none")
-     .attr("stroke", "black")
-     .attr("stroke-width", 2)
-
-  svg.append("path")
-     .datum(data.ind)
      .attr("class", "line")
-     .attr("d", quline(midQuant))
-     .attr("fill", "none")
-     .attr("stroke-width", "2")
      .attr("stroke", "black")
+     .attr("stroke-width", 3)
 
-  colors = ["blue", "green", "orange", "red"]
 
-  for j in [0..(midQuant-1)]
+  colors = ["blue", "green", "orange", "red", "black"]
+  for j in [3..0]
+    colors.push(colors[j])
+
+  for j in [0...nQuant]
     svg.append("path")
        .datum(data.ind)
-       .attr("class", "line")
        .attr("d", quline(j))
-       .attr("fill", "none")
-       .attr("stroke-width", "1")
+       .attr("class", "line")
        .attr("stroke", colors[j])
-
-  for j in [(midQuant+1)..(nQuant-1)]
-    svg.append("path")
-       .datum(data.ind)
-       .attr("class", "line")
-       .attr("d", quline(j))
-       .attr("fill", "none")
-       .attr("stroke-width", "1")
-       .attr("stroke", colors[nQuant-1-j])
 
   indRect = svg.selectAll("rect.ind")
                  .data(data.ind)
@@ -76,10 +60,22 @@ draw = (data) ->
                  .attr("fill", "purple")
                  .attr("stroke", "none")
                  .attr("opacity", "0")
-                .attr("class","unselected")
 
-  indRect.on("mouseover", -> d3.select(this).attr("opacity", "1").attr("class", "selected"))
-         .on("mouseout", -> d3.select(this).attr("opacity", "0").attr("class","unselected"))
+  indRect.on("mouseover", -> d3.select(this).attr("opacity", "1"))
+         .on("mouseout", -> d3.select(this).attr("opacity", "0"))
+
+
+  for j in [0...nQuant]
+    svg.selectAll("text.qu")
+       .data(data.qu)
+       .enter()
+       .append("text")
+       .attr("class", "qu")
+       .text( (d) -> "#{d*100}%")
+       .attr("x", w-pad*0.1)
+       .attr("y", (d,i) -> h*(1 - (i+2)/(data.qu.length+3)))
+       .attr("fill", (d,i) -> colors[i])
+       .attr("text-anchor", "end")
 
 
 # load json file and call draw function

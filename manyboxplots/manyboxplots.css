@@ -1,0 +1,10 @@
+
+.line {
+  stroke-width: 1;
+  fill: none;
+}
+
+text {
+ font-family: sans-serif;
+ font-size: 11pt;
+}
