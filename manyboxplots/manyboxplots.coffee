@@ -3,7 +3,7 @@ draw = (data) ->
 
   # dimensions of SVG
   w = 1000
-  h = 500
+  h = 450
   pad = 40
 
   # number of quantiles
@@ -18,7 +18,8 @@ draw = (data) ->
              .domain([-1.1, 1.1])
              .range([h-pad, pad])
 
-  axisFormat = d3.format(".2f")
+  axisFormat2 = d3.format(".2f")
+  axisFormat1 = d3.format(".1f")
 
   quline = (j) ->
     d3.svg.line()
@@ -61,7 +62,7 @@ draw = (data) ->
      .enter()
      .append("text")
      .attr("class", "axis")
-     .text((d) -> axisFormat(d))
+     .text((d) -> axisFormat2(d))
      .attr("x", pad*0.9)
      .attr("y", (d) -> yScale(d))
      .attr("dominant-baseline", "middle")
@@ -128,10 +129,6 @@ draw = (data) ->
                  .attr("stroke", "none")
                  .attr("opacity", "0")
 
-  indRect.on("mouseover", -> d3.select(this).attr("opacity", "1"))
-         .on("mouseout", -> d3.select(this).attr("opacity", "0"))
-
-
   # label quantiles on right
   rightAxis = svg.append("g")
 
@@ -166,6 +163,97 @@ draw = (data) ->
      .attr("stroke", "black")
      .attr("stroke-width", 2)
      .attr("fill", "none")
+
+  # lower svg
+  lowsvg = d3.select("body").append("svg")
+             .attr("height", h)
+             .attr("width", w)
+
+  lowxScale = d3.scale.linear()
+             .domain([-2, 2])
+             .range([pad, w-pad])
+
+  maxCount = 0;
+  for i of data.counts
+    for j of data.counts[i]
+      maxCount = data.counts[i][j] if data.counts[i][j] > maxCount
+
+  lowyScale = d3.scale.linear()
+             .domain([0, maxCount+0.5])
+             .range([h-pad, pad])
+
+  # gray background
+  lowsvg.append("rect")
+     .attr("x", pad)
+     .attr("y", pad)
+     .attr("height", h-2*pad)
+     .attr("width", w-2*pad)
+     .attr("stroke", "none")
+     .attr("fill", d3.rgb(200, 200, 200))
+
+  # axis on left
+  lowBaxisData = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
+  lowBaxis = lowsvg.append("g")
+
+  # axis: white lines
+  lowBaxis.append("g").selectAll("empty")
+     .data(lowBaxisData)
+     .enter()
+     .append("line")
+     .attr("class", "line")
+     .attr("class", "axis")
+     .attr("y1", pad)
+     .attr("y2", w-pad)
+     .attr("x1", (d) -> lowxScale(d))
+     .attr("x2", (d) -> lowxScale(d))
+     .attr("stroke", "white")
+
+  # axis: labels
+  lowBaxis.append("g").selectAll("empty")
+     .data(lowBaxisData)
+     .enter()
+     .append("text")
+     .attr("class", "axis")
+     .text((d) -> axisFormat1(d))
+     .attr("y", h-pad*0.7)
+     .attr("x", (d) -> lowxScale(d))
+     .attr("dominant-baseline", "middle")
+     .attr("text-anchor", "middle")
+  
+  histline = d3.svg.line()
+        .x((d,i) -> lowxScale(data.br[i]))
+        .y((d) -> lowyScale(d))
+
+  hist = lowsvg.append("path")
+    .datum(data.counts["Mouse3084"])
+       .attr("d", histline)
+       .attr("id", "histline")
+       .attr("fill", "none")
+       .attr("stroke", "purple")
+       .attr("stroke-width", "2")
+
+  indRect
+    .on("mouseover", (d) ->
+              d3.select(this).attr("opacity", "1")
+              d3.select("#histline")
+                 .datum(data.counts[d])
+                 .attr("d", histline)
+            )
+    .on("mouseout", (d) ->
+              d3.select(this).attr("opacity", "0")
+            )
+
+  # box around the outside
+  lowsvg.append("rect")
+     .attr("x", pad)
+     .attr("y", pad)
+     .attr("height", h-2*pad)
+     .attr("width", w-2*pad)
+     .attr("stroke", "black")
+     .attr("stroke-width", 2)
+     .attr("fill", "none")
+
+
 
 # load json file and call draw function
 d3.json("hypo.json", draw)
