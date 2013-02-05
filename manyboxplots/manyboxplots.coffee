@@ -39,11 +39,12 @@ draw = (data) ->
      .attr("fill", d3.rgb(200, 200, 200))
 
   # axis on left
-  axis = svg.append("g")
+  LaxisData = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
+  Laxis = svg.append("g")
 
   # axis: white lines
-  axis.append("g").selectAll("line.axis")
-     .data([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
+  Laxis.append("g").selectAll("empty")
+     .data(LaxisData)
      .enter()
      .append("line")
      .attr("class", "line")
@@ -55,8 +56,8 @@ draw = (data) ->
      .attr("stroke", "white")
 
   # axis: labels
-  axis.append("g").selectAll("text.axis")
-     .data([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
+  Laxis.append("g").selectAll("empty")
+     .data(LaxisData)
      .enter()
      .append("text")
      .attr("class", "axis")
@@ -65,6 +66,36 @@ draw = (data) ->
      .attr("y", (d) -> yScale(d))
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "end")
+
+
+  # axis on left
+  BaxisData = [50, 100, 150, 200, 250, 300, 350, 400, 450]
+  Baxis = svg.append("g")
+
+  # axis: white lines
+  Baxis.append("g").selectAll("empty")
+     .data(BaxisData)
+     .enter()
+     .append("line")
+     .attr("class", "line")
+     .attr("class", "axis")
+     .attr("y1", pad)
+     .attr("y2", h-pad)
+     .attr("x1", (d) -> xScale(d))
+     .attr("x2", (d) -> xScale(d))
+     .attr("stroke", "white")
+
+  # axis: labels
+  Baxis.append("g").selectAll("empty")
+     .data(BaxisData)
+     .enter()
+     .append("text")
+     .attr("class", "axis")
+     .text((d) -> d)
+     .attr("y", h-pad*0.7)
+     .attr("x", (d) -> xScale(d))
+     .attr("dominant-baseline", "middle")
+     .attr("text-anchor", "middle")
 
 
   # curves for quantiles
@@ -84,7 +115,7 @@ draw = (data) ->
   # vertical rectangles representing each array
   indRectGrp = svg.append("g")
 
-  indRect = indRectGrp.selectAll("rect.ind")
+  indRect = indRectGrp.selectAll("empty")
                  .data(data.ind)
                  .enter()
                  .append("rect")
@@ -105,7 +136,7 @@ draw = (data) ->
   rightAxis = svg.append("g")
 
   for j in [0...nQuant]
-    rightAxis.selectAll("text.qu")
+    rightAxis.selectAll("empty")
        .data(data.qu)
        .enter()
        .append("text")
@@ -127,7 +158,6 @@ draw = (data) ->
      .attr("stroke", "black")
      .attr("stroke-width", 2)
      .attr("fill", "none")
-
 
 # load json file and call draw function
 d3.json("hypo.json", draw)
