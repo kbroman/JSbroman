@@ -29,16 +29,20 @@ draw = (data) ->
           .attr("width", w)
           .attr("height", h)
 
+  # gray background
   svg.append("rect")
      .attr("x", pad)
      .attr("y", pad)
      .attr("height", h-2*pad)
      .attr("width", w-2*pad)
-     .attr("stroke", "black")
-     .attr("stroke-width", 2)
+     .attr("stroke", "none")
      .attr("fill", d3.rgb(200, 200, 200))
 
-  svg.selectAll("line.axis")
+  # axis on left
+  axis = svg.append("g")
+
+  # axis: white lines
+  axis.append("g").selectAll("line.axis")
      .data([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
      .enter()
      .append("line")
@@ -50,7 +54,8 @@ draw = (data) ->
      .attr("y2", (d) -> yScale(d))
      .attr("stroke", "white")
 
-  svg.selectAll("text.axis")
+  # axis: labels
+  axis.append("g").selectAll("text.axis")
      .data([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
      .enter()
      .append("text")
@@ -61,27 +66,25 @@ draw = (data) ->
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "end")
 
-  svg.append("rect")
-     .attr("x", pad)
-     .attr("y", pad)
-     .attr("height", h-2*pad)
-     .attr("width", w-2*pad)
-     .attr("stroke", "black")
-     .attr("stroke-width", 2)
-     .attr("fill", "none")
 
+  # curves for quantiles
   colors = ["blue", "green", "orange", "red", "black"]
   for j in [3..0]
     colors.push(colors[j])
 
+  curves = svg.append("g")
+
   for j in [0...nQuant]
-    svg.append("path")
+    curves.append("path")
        .datum(data.ind)
        .attr("d", quline(j))
        .attr("class", "line")
        .attr("stroke", colors[j])
 
-  indRect = svg.selectAll("rect.ind")
+  # vertical rectangles representing each array
+  indRectGrp = svg.append("g")
+
+  indRect = indRectGrp.selectAll("rect.ind")
                  .data(data.ind)
                  .enter()
                  .append("rect")
@@ -98,8 +101,11 @@ draw = (data) ->
          .on("mouseout", -> d3.select(this).attr("opacity", "0"))
 
 
+  # label quantiles on right
+  rightAxis = svg.append("g")
+
   for j in [0...nQuant]
-    svg.selectAll("text.qu")
+    rightAxis.selectAll("text.qu")
        .data(data.qu)
        .enter()
        .append("text")
@@ -110,6 +116,17 @@ draw = (data) ->
        .attr("fill", (d,i) -> colors[i])
        .attr("text-anchor", "end")
        .attr("dominant-baseline", "middle")
+
+
+  # box around the outside
+  svg.append("rect")
+     .attr("x", pad)
+     .attr("y", pad)
+     .attr("height", h-2*pad)
+     .attr("width", w-2*pad)
+     .attr("stroke", "black")
+     .attr("stroke-width", 2)
+     .attr("fill", "none")
 
 
 # load json file and call draw function
