@@ -1,4 +1,9 @@
 
+svg {
+  margin-top:  50px;
+  margin-left: 50px;
+}
+
 .line {
   stroke-width: 1;
   fill: none;
