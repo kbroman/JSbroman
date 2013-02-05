@@ -1,11 +1,14 @@
 # function that does all of the work
 draw = (data) ->
 
+  # dimensions of SVG
   w = 1000
   h = 500
   pad = 20
 
-  console.log(data.ind.length)
+  # number of quantiles
+  nQuant = data.quant.length
+  midQuant = (nQuant+1)/2 - 1
 
   xScale = d3.scale.linear()
              .domain([0, data.ind.length-1])
@@ -36,14 +39,14 @@ draw = (data) ->
   svg.append("path")
      .datum(data.ind)
      .attr("class", "line")
-     .attr("d", quline(4))
+     .attr("d", quline(midQuant))
      .attr("fill", "none")
      .attr("stroke-width", "2")
      .attr("stroke", "black")
 
   colors = ["blue", "green", "orange", "red"]
 
-  for j in [0..3]
+  for j in [0..(midQuant-1)]
     svg.append("path")
        .datum(data.ind)
        .attr("class", "line")
@@ -52,14 +55,14 @@ draw = (data) ->
        .attr("stroke-width", "1")
        .attr("stroke", colors[j])
 
-  for j in [5..8]
+  for j in [(midQuant+1)..(nQuant-1)]
     svg.append("path")
        .datum(data.ind)
        .attr("class", "line")
        .attr("d", quline(j))
        .attr("fill", "none")
        .attr("stroke-width", "1")
-       .attr("stroke", colors[8-j])
+       .attr("stroke", colors[nQuant-1-j])
 
 # load json file and call draw function
 d3.json("hypo.json", draw)
