@@ -64,5 +64,23 @@ draw = (data) ->
        .attr("stroke-width", "1")
        .attr("stroke", colors[nQuant-1-j])
 
+  indRect = svg.selectAll("rect.ind")
+                 .data(data.ind)
+                 .enter()
+                 .append("rect")
+                 .attr("x", (d,i) -> xScale(i-0.5))
+                 .attr("y", (d) -> yScale(data.quant[nQuant-1][d]))
+                 .attr("width", 2)
+                 .attr("height", (d) ->
+                    yScale(data.quant[0][d]) - yScale(data.quant[nQuant-1][d]))
+                 .attr("fill", "purple")
+                 .attr("stroke", "none")
+                 .attr("opacity", "0")
+                .attr("class","unselected")
+
+  indRect.on("mouseover", -> d3.select(this).attr("opacity", "1").attr("class", "selected"))
+         .on("mouseout", -> d3.select(this).attr("opacity", "0").attr("class","unselected"))
+
+
 # load json file and call draw function
 d3.json("hypo.json", draw)
