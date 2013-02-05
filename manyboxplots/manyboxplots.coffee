@@ -135,8 +135,7 @@ draw = (data) ->
   # label quantiles on right
   rightAxis = svg.append("g")
 
-  for j in [0...nQuant]
-    rightAxis.selectAll("empty")
+  rightAxis.selectAll("empty")
        .data(data.qu)
        .enter()
        .append("text")
@@ -148,6 +147,15 @@ draw = (data) ->
        .attr("text-anchor", "end")
        .attr("dominant-baseline", "middle")
 
+
+  # white box above to smother overlap
+  svg.append("rect")
+     .attr("x", 0)
+     .attr("y", 0)
+     .attr("width", w)
+     .attr("height", pad)
+     .attr("stroke", "none")
+     .attr("fill", "white")
 
   # box around the outside
   svg.append("rect")
