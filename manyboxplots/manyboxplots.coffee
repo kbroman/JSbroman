@@ -253,6 +253,7 @@ draw = (data) ->
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "middle")
 
+  grp4BkgdHist = lowsvg.append("g")
 
   histline = d3.svg.line()
         .x((d,i) -> lowxScale(br2[i]))
@@ -304,7 +305,7 @@ draw = (data) ->
                 d3.select(this).attr("opacity", "0")
                 svg.select("rect##{d}").attr("fill", curcolor)
 
-                lowsvg.append("path")
+                grp4BkgdHist.append("path")
                       .datum(data.counts[d])
                       .attr("d", histline)
                       .attr("id", d)
@@ -312,7 +313,7 @@ draw = (data) ->
                       .attr("stroke", curcolor)
                       .attr("stroke-width", "2")
               else
-                lowsvg.select("path##{d}").remove()
+                grp4BkgdHist.select("path##{d}").remove()
             )
 
   # box around the outside
