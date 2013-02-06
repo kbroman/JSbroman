@@ -204,7 +204,7 @@ draw = (data) ->
   low = data.br[0] - (data.br[1] - data.br[0])
 
   lowxScale = d3.scale.linear()
-             .domain([low, -low])
+             .domain([-1.25, -low])
              .range([pad.left, w-pad.right])
 
   maxCount = 0;
@@ -227,7 +227,7 @@ draw = (data) ->
      .attr("fill", d3.rgb(200, 200, 200))
 
   # axis on left
-  lowBaxisData = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
+  lowBaxisData = [-1, -0.5, 0, 0.5, 1, 1.5, 2]
   lowBaxis = lowsvg.append("g")
 
   # axis: white lines
@@ -241,7 +241,9 @@ draw = (data) ->
      .attr("y2", h-pad.bottom)
      .attr("x1", (d) -> lowxScale(d))
      .attr("x2", (d) -> lowxScale(d))
-     .attr("stroke", "white")
+     .attr("stroke", (d) ->
+           return "white" if d != 0
+           "rgb(255,220,255)")
 
   # axis: labels
   lowBaxis.append("g").selectAll("empty")
@@ -328,6 +330,15 @@ draw = (data) ->
      .attr("stroke", "none")
      .attr("fill", "white")
 
+  # white box to left smother overlap
+  lowsvg.append("rect")
+     .attr("x", 0)
+     .attr("y", 0)
+     .attr("width", pad.left)
+     .attr("height", h)
+     .attr("stroke", "none")
+     .attr("fill", "white")
+
   # box around the outside
   lowsvg.append("rect")
      .attr("x", pad.left)
@@ -350,7 +361,7 @@ draw = (data) ->
 
   lowsvg.append("text")
      .text("Gene expression (mlratio)")
-     .attr("x", lowxScale(0))
+     .attr("x", (w-pad.left-pad.bottom)/2+pad.left)
      .attr("y", h-pad.bottom*0.2)
      .attr("fill", "blue")
      .attr("dominant-baseline", "middle")
@@ -358,7 +369,7 @@ draw = (data) ->
 
   svg.append("text")
      .text("Arrays, sorted by median expression")
-     .attr("x", xScale(data.ind.length/2))
+     .attr("x", (w-pad.left-pad.bottom)/2+pad.left)
      .attr("y", h-pad.bottom*0.2)
      .attr("fill", "blue")
      .attr("dominant-baseline", "middle")
