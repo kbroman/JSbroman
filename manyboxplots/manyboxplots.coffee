@@ -4,7 +4,7 @@ draw = (data) ->
   # dimensions of SVG
   w = 1000
   h = 450
-  pad = 40
+  pad = {left:60, top:20, right:40, bottom: 40}
 
   # adjust counts object to make proper histogram
   br2 = []
@@ -29,11 +29,11 @@ draw = (data) ->
 
   xScale = d3.scale.linear()
              .domain([0, data.ind.length-1])
-             .range([pad, w-pad])
+             .range([pad.left, w-pad.right])
 
   yScale = d3.scale.linear()
              .domain([-1.1, 1.1])
-             .range([h-pad, pad])
+             .range([h-pad.bottom, pad.top])
 
   axisFormat2 = d3.format(".2f")
   axisFormat1 = d3.format(".1f")
@@ -49,10 +49,10 @@ draw = (data) ->
 
   # gray background
   svg.append("rect")
-     .attr("x", pad)
-     .attr("y", pad)
-     .attr("height", h-2*pad)
-     .attr("width", w-2*pad)
+     .attr("x", pad.left)
+     .attr("y", pad.top)
+     .attr("height", h-pad.top-pad.bottom)
+     .attr("width", w-pad.left-pad.right)
      .attr("stroke", "none")
      .attr("fill", d3.rgb(200, 200, 200))
 
@@ -67,8 +67,8 @@ draw = (data) ->
      .append("line")
      .attr("class", "line")
      .attr("class", "axis")
-     .attr("x1", pad)
-     .attr("x2", w-pad)
+     .attr("x1", pad.left)
+     .attr("x2", w-pad.right)
      .attr("y1", (d) -> yScale(d))
      .attr("y2", (d) -> yScale(d))
      .attr("stroke", "white")
@@ -80,7 +80,7 @@ draw = (data) ->
      .append("text")
      .attr("class", "axis")
      .text((d) -> axisFormat2(d))
-     .attr("x", pad*0.9)
+     .attr("x", pad.left*0.9)
      .attr("y", (d) -> yScale(d))
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "end")
@@ -97,8 +97,8 @@ draw = (data) ->
      .append("line")
      .attr("class", "line")
      .attr("class", "axis")
-     .attr("y1", pad)
-     .attr("y2", h-pad)
+     .attr("y1", pad.top)
+     .attr("y2", h-pad.bottom)
      .attr("x1", (d) -> xScale(d))
      .attr("x2", (d) -> xScale(d))
      .attr("stroke", "white")
@@ -110,7 +110,7 @@ draw = (data) ->
      .append("text")
      .attr("class", "axis")
      .text((d) -> d)
-     .attr("y", h-pad*0.7)
+     .attr("y", h-pad.bottom*0.75)
      .attr("x", (d) -> xScale(d))
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "middle")
@@ -133,9 +133,10 @@ draw = (data) ->
   # special rectangles in the background
   clickStatus = {}
   index = {}
+  specialrects = svg.append("g")
   for d,i in data.ind
     clickStatus[d] = 0;
-    svg.append("rect")
+    specialrects.append("rect")
        .attr("x", xScale(i-0.5))
        .attr("y", yScale(data.quant[nQuant-1][d]))
        .attr("width", 2)
@@ -169,7 +170,7 @@ draw = (data) ->
        .append("text")
        .attr("class", "qu")
        .text( (d) -> "#{d*100}%")
-       .attr("x", w-pad*0.1)
+       .attr("x", w-pad.right*0.1)
        .attr("y", (d,i) -> yScale((i+0.5)/nQuant - 0.5))
        .attr("fill", (d,i) -> colors[i])
        .attr("text-anchor", "end")
@@ -181,16 +182,16 @@ draw = (data) ->
      .attr("x", 0)
      .attr("y", 0)
      .attr("width", w)
-     .attr("height", pad)
+     .attr("height", pad.top)
      .attr("stroke", "none")
      .attr("fill", "white")
 
   # box around the outside
   svg.append("rect")
-     .attr("x", pad)
-     .attr("y", pad)
-     .attr("height", h-2*pad)
-     .attr("width", w-2*pad)
+     .attr("x", pad.left)
+     .attr("y", pad.top)
+     .attr("height", h-pad.top-pad.bottom)
+     .attr("width", w-pad.left-pad.right)
      .attr("stroke", "black")
      .attr("stroke-width", 2)
      .attr("fill", "none")
@@ -204,7 +205,7 @@ draw = (data) ->
 
   lowxScale = d3.scale.linear()
              .domain([low, -low])
-             .range([pad, w-pad])
+             .range([pad.left, w-pad.right])
 
   maxCount = 0;
   for i of data.counts
@@ -213,14 +214,14 @@ draw = (data) ->
 
   lowyScale = d3.scale.linear()
              .domain([0, maxCount+0.5])
-             .range([h-pad, pad])
+             .range([h-pad.bottom, pad.top])
 
   # gray background
   lowsvg.append("rect")
-     .attr("x", pad)
-     .attr("y", pad)
-     .attr("height", h-2*pad)
-     .attr("width", w-2*pad)
+     .attr("x", pad.left)
+     .attr("y", pad.top)
+     .attr("height", h-pad.top-pad.bottom)
+     .attr("width", w-pad.left-pad.right)
      .attr("stroke", "none")
      .attr("fill", d3.rgb(200, 200, 200))
 
@@ -235,8 +236,8 @@ draw = (data) ->
      .append("line")
      .attr("class", "line")
      .attr("class", "axis")
-     .attr("y1", pad)
-     .attr("y2", w-pad)
+     .attr("y1", pad.top)
+     .attr("y2", h-pad.bottom)
      .attr("x1", (d) -> lowxScale(d))
      .attr("x2", (d) -> lowxScale(d))
      .attr("stroke", "white")
@@ -248,7 +249,7 @@ draw = (data) ->
      .append("text")
      .attr("class", "axis")
      .text((d) -> axisFormat1(d))
-     .attr("y", h-pad*0.7)
+     .attr("y", h-pad.bottom*0.75)
      .attr("x", (d) -> lowxScale(d))
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "middle")
@@ -274,12 +275,13 @@ draw = (data) ->
 
   lowsvg.append("text")
         .datum(randomInd)
-        .attr("x", w/2)
-        .attr("y", pad/2)
+        .attr("x", lowxScale(-1.75))
+        .attr("y", pad.top*2)
         .text((d) -> d)
         .attr("id", "histtitle")
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
+        .attr("fill", "blue")
 
   indRect
     .on("mouseover", (d) ->
@@ -318,14 +320,39 @@ draw = (data) ->
 
   # box around the outside
   lowsvg.append("rect")
-     .attr("x", pad)
-     .attr("y", pad)
-     .attr("height", h-2*pad)
-     .attr("width", w-2*pad)
+     .attr("x", pad.left)
+     .attr("y", pad.top)
+     .attr("height", h-pad.bottom-pad.top)
+     .attr("width", w-pad.left-pad.right)
      .attr("stroke", "black")
      .attr("stroke-width", 2)
      .attr("fill", "none")
 
+
+  svg.append("text")
+     .text("Gene expression (mlratio)")
+     .attr("x", pad.left*0.2)
+     .attr("y", h/2)
+     .attr("fill", "blue")
+     .attr("transform", "rotate(270 #{pad.left*0.2} #{h/2})")
+     .attr("dominant-baseline", "middle")
+     .attr("text-anchor", "middle")
+
+  lowsvg.append("text")
+     .text("Gene expression (mlratio)")
+     .attr("x", lowxScale(0))
+     .attr("y", h-pad.bottom*0.2)
+     .attr("fill", "blue")
+     .attr("dominant-baseline", "middle")
+     .attr("text-anchor", "middle")
+
+  svg.append("text")
+     .text("Arrays, sorted by median expression")
+     .attr("x", xScale(data.ind.length/2))
+     .attr("y", h-pad.bottom*0.2)
+     .attr("fill", "blue")
+     .attr("dominant-baseline", "middle")
+     .attr("text-anchor", "middle")
 
 
 # load json file and call draw function
