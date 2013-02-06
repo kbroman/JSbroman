@@ -130,6 +130,20 @@ draw = (data) ->
        .attr("class", "line")
        .attr("stroke", colors[j])
 
+  # special rectangles in the background
+  clickStatus = {}
+  index = {}
+  for d,i in data.ind
+    clickStatus[d] = 0;
+    svg.append("rect")
+       .attr("x", xScale(i-0.5))
+       .attr("y", yScale(data.quant[nQuant-1][d]))
+       .attr("width", 2)
+       .attr("id", d)
+       .attr("height", yScale(data.quant[0][d]) - yScale(data.quant[nQuant-1][d]))
+       .attr("fill", "blue")
+       .attr("opacity", 0)
+
   # vertical rectangles representing each array
   indRectGrp = svg.append("g")
 
@@ -239,6 +253,7 @@ draw = (data) ->
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "middle")
 
+
   histline = d3.svg.line()
         .x((d,i) -> lowxScale(br2[i]))
         .y((d) -> lowyScale(d))
@@ -275,6 +290,21 @@ draw = (data) ->
             )
     .on("mouseout", (d) ->
               d3.select(this).attr("opacity", "0")
+            )
+    .on("click", (d) ->
+              clickStatus[d] = 1 - clickStatus[d]
+              svg.select("rect##{d}").attr("opacity", clickStatus[d])
+              if clickStatus[d]
+                d3.select(this).attr("opacity", "0")
+                lowsvg.append("path")
+                      .datum(data.counts[d])
+                      .attr("d", histline)
+                      .attr("id", d)
+                      .attr("fill", "none")
+                      .attr("stroke", "blue")
+                      .attr("stroke-width", "2")
+              else
+                lowsvg.select("path##{d}").remove()
             )
 
   # box around the outside
