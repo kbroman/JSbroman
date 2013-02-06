@@ -211,6 +211,7 @@ draw = (data) ->
   for i of data.counts
     for j of data.counts[i]
       maxCount = data.counts[i][j] if data.counts[i][j] > maxCount
+  maxCount *= 0.5
 
   lowyScale = d3.scale.linear()
              .domain([0, maxCount+0.5])
@@ -317,6 +318,15 @@ draw = (data) ->
               else
                 grp4BkgdHist.select("path##{d}").remove()
             )
+
+  # white box above to smother overlap
+  lowsvg.append("rect")
+     .attr("x", 0)
+     .attr("y", 0)
+     .attr("width", w)
+     .attr("height", pad.top)
+     .attr("stroke", "none")
+     .attr("fill", "white")
 
   # box around the outside
   lowsvg.append("rect")
