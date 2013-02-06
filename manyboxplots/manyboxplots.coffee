@@ -6,6 +6,23 @@ draw = (data) ->
   h = 450
   pad = 40
 
+  # adjust counts object to make proper histogram
+  br2 = []
+  for i in data.br
+    br2.push(i)
+    br2.push(i)
+
+  fix4hist = (d) ->
+    x = [0]
+    for i in d
+       x.push(i)
+       x.push(i)
+    x.push(0)
+    x
+
+  for i of data.counts
+    data.counts[i] = fix4hist(data.counts[i])
+
   # number of quantiles
   nQuant = data.quant.length
   midQuant = (nQuant+1)/2 - 1
@@ -169,8 +186,10 @@ draw = (data) ->
              .attr("height", h)
              .attr("width", w)
 
+  low = data.br[0] - (data.br[1] - data.br[0])
+
   lowxScale = d3.scale.linear()
-             .domain([-2, 2])
+             .domain([low, -low])
              .range([pad, w-pad])
 
   maxCount = 0;
@@ -221,7 +240,7 @@ draw = (data) ->
      .attr("text-anchor", "middle")
 
   histline = d3.svg.line()
-        .x((d,i) -> lowxScale(data.br[i]))
+        .x((d,i) -> lowxScale(br2[i]))
         .y((d) -> lowyScale(d))
 
   randomInd = data.ind[Math.floor(Math.random()*data.ind.length)]
