@@ -141,8 +141,8 @@ draw = (data) ->
        .attr("width", 2)
        .attr("id", d)
        .attr("height", yScale(data.quant[0][d]) - yScale(data.quant[nQuant-1][d]))
-       .attr("fill", "blue")
        .attr("opacity", 0)
+       .attr("stroke", "none")
 
   # vertical rectangles representing each array
   indRectGrp = svg.append("g")
@@ -269,6 +269,8 @@ draw = (data) ->
        .attr("stroke-width", "2")
 
 
+  histColors = ["blue", "red", "green", "orange", "black"]
+
   lowsvg.append("text")
         .datum(randomInd)
         .attr("x", w/2)
@@ -280,7 +282,8 @@ draw = (data) ->
 
   indRect
     .on("mouseover", (d) ->
-              d3.select(this).attr("opacity", "1")
+              d3.select(this)
+                 .attr("opacity", "1")
               d3.select("#histline")
                  .datum(data.counts[d])
                  .attr("d", histline)
@@ -295,13 +298,18 @@ draw = (data) ->
               clickStatus[d] = 1 - clickStatus[d]
               svg.select("rect##{d}").attr("opacity", clickStatus[d])
               if clickStatus[d]
+                curcolor = histColors.shift()
+                histColors.push(curcolor)
+
                 d3.select(this).attr("opacity", "0")
+                svg.select("rect##{d}").attr("fill", curcolor)
+
                 lowsvg.append("path")
                       .datum(data.counts[d])
                       .attr("d", histline)
                       .attr("id", d)
                       .attr("fill", "none")
-                      .attr("stroke", "blue")
+                      .attr("stroke", curcolor)
                       .attr("stroke-width", "2")
               else
                 lowsvg.select("path##{d}").remove()
