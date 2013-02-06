@@ -219,18 +219,30 @@ draw = (data) ->
      .attr("x", (d) -> lowxScale(d))
      .attr("dominant-baseline", "middle")
      .attr("text-anchor", "middle")
-  
+
   histline = d3.svg.line()
         .x((d,i) -> lowxScale(data.br[i]))
         .y((d) -> lowyScale(d))
 
+  randomInd = data.ind[Math.floor(Math.random()*data.ind.length)]
+
   hist = lowsvg.append("path")
-    .datum(data.counts["Mouse3084"])
+    .datum(data.counts[randomInd])
        .attr("d", histline)
        .attr("id", "histline")
        .attr("fill", "none")
        .attr("stroke", "purple")
        .attr("stroke-width", "2")
+
+
+  lowsvg.append("text")
+        .datum(randomInd)
+        .attr("x", w/2)
+        .attr("y", pad/2)
+        .text((d) -> d)
+        .attr("id", "histtitle")
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
 
   indRect
     .on("mouseover", (d) ->
@@ -238,6 +250,9 @@ draw = (data) ->
               d3.select("#histline")
                  .datum(data.counts[d])
                  .attr("d", histline)
+              d3.select("#histtitle")
+                 .datum(d)
+                 .text((d) -> d)
             )
     .on("mouseout", (d) ->
               d3.select(this).attr("opacity", "0")
