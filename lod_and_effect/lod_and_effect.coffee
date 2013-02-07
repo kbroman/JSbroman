@@ -120,6 +120,7 @@ draw = (data) ->
           .attr("d", lodcurve(j))
           .attr("class", "thickline")
           .attr("stroke", "blue")
+          .style("pointer-events", "none")
 
   # detailed LOD curves below
   botlodcurve = (j) ->
