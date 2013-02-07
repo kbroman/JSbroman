@@ -121,22 +121,27 @@ draw = (data) ->
           .attr("class", "thickline")
           .attr("stroke", "blue")
 
-
+  # detailed LOD curves below
   botlodcurve = (j) ->
       d3.svg.line()
           .x((d) -> botLxScale[j](d))
           .y((d,i) -> yScale(data.lod[j].lod[i]))
           
-  detailedLod = botsvg.append("g").append("path")
-     .datum(data.lod["9"].pos)
-     .attr("d", botlodcurve("9"))
-     .attr("class", "thickline")
-     .attr("stroke", "blue")
+  detailedLod = {}
+  for i in data.chr
+    detailedLod[i] = botsvg.append("g").append("path")
+       .datum(data.lod[i].pos)
+       .attr("d", botlodcurve(i))
+       .attr("class", "thickline")
+       .attr("stroke", "blue")
+       .attr("opacity", 0)
 
   chrRect.on("mouseover", (d) ->
-             d3.select(this).attr("fill", "#E9CFEC"))
+             d3.select(this).attr("fill", "#E9CFEC")
+             detailedLod[d].attr("opacity", 1))
          .on("mouseout", (d) ->
-             d3.select(this).attr("fill", chrColor[d]))
+             d3.select(this).attr("fill", chrColor[d])
+             detailedLod[d].attr("opacity", 0))
 
   # chr labels
   topsvg.append("g").selectAll("empty")
