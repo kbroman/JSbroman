@@ -11,8 +11,6 @@ lipomics <- lipomics[id$second,]
 f2g <- calc.genoprob(f2g, step=0.5, stepwidth="max", error.prob=0.002, map.function="c-f")
 f2g$pheno$insulin <- rowMeans(lipomics[,c(37,41)], na.rm=TRUE)
 
-f2g <- f2g[1:19,] # I don't want to deal with the X chromosome
-
 # genome scan with sex as interactive covariate
 sex <- as.numeric(f2g$pheno$Sex)
 out <- scanone(f2g, phe="insulin", addcovar=sex, intcovar=sex, method="hk")
@@ -30,7 +28,9 @@ for(i in seq(along=mar)) {
 for(i in seq(along=qtleffects)) {
   qtleffects[[i]]$Means <- lapply(as.list(as.data.frame(qtleffects[[i]]$Means)), function(a) {names(a) <- c("Female", "Male"); a})
   qtleffects[[i]]$SEs <- lapply(as.list(as.data.frame(qtleffects[[i]]$SEs)), function(a) {names(a) <- c("Female", "Male"); a})
-  names(qtleffects[[i]]$Means) <- names(qtleffects[[i]]$SEs) <- c("BB", "BR", "RR")
+  nam <- names(qtleffects[[i]]$Means)
+  nam <- sapply(strsplit(nam, "\\."), function(a) a[2])
+  names(qtleffects[[i]]$Means) <- names(qtleffects[[i]]$SEs) <- nam
 }
 
 # marker index within lod curves
