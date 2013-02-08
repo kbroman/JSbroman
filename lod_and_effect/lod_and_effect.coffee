@@ -129,14 +129,18 @@ draw = (data) ->
           .x((d) -> botLxScale[j](d))
           .y((d,i) -> yScale(data.lod[j].lod[i]))
 
+  randomChr = data.chr[Math.floor(Math.random()*data.chr.length)]
+
   botsvg.append("g").append("path")
-       .attr("d", botlodcurve("2")(data.lod["2"].pos))
+       .attr("d", botlodcurve(randomChr)(data.lod[randomChr].pos))
        .attr("class", "thickline")
        .attr("id", "detailedLod")
        .attr("stroke", "blue")
 
+
   # select of chromosome for lower LOD detailed curve
-  lastChr = 0
+  lastChr = randomChr
+  topsvg.select("#rect#{randomChr}").attr("fill", "#E9CFEC")
   chrRect.on("click", (d) ->
              d3.select(this).attr("fill", "#E9CFEC")
              topsvg.select("#rect#{lastChr}").attr("fill", chrColor[lastChr]) if lastChr != 0
