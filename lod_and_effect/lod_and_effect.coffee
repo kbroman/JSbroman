@@ -30,21 +30,21 @@ draw = (data) ->
      .attr("y", pad.top)
      .attr("height", hInner)
      .attr("width", wInner)
-     .attr("class", "innerBox") 
+     .attr("class", "innerBox")
 
   botsvg.append("rect")
      .attr("x", pad.left)
      .attr("y", pad.top)
      .attr("height", hInner)
      .attr("width", botLwInner)
-     .attr("class", "innerBox") 
+     .attr("class", "innerBox")
 
   botsvg.append("rect")
      .attr("x", botLw+pad.left)
      .attr("y", pad.top)
      .attr("height", hInner)
      .attr("width", botRwInner)
-     .attr("class", "innerBox") 
+     .attr("class", "innerBox")
 
 
   # maximum LOD score
@@ -104,7 +104,7 @@ draw = (data) ->
      .attr("width", (d) -> chrPixelEnd[d] - chrPixelStart[d]+chrGap)
      .attr("height", (d) -> hInner)
      .attr("fill", (d) -> chrColor[d])
-     .attr("stroke", "none")  
+     .attr("stroke", "none")
 
   # lod curves by chr
   lodcurve = (j) ->
@@ -127,7 +127,7 @@ draw = (data) ->
       d3.svg.line()
           .x((d) -> botLxScale[j](d))
           .y((d,i) -> yScale(data.lod[j].lod[i]))
-          
+
   detailedLod = {}
   for i in data.chr
     detailedLod[i] = botsvg.append("g").append("path")
