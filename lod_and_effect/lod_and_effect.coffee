@@ -176,7 +176,7 @@ draw = (data) ->
 
   dotsAtMarkers(randomChr)
 
-  # select of chromosome for lower LOD detailed curve
+  # select chromosome for lower LOD detailed curve
   lastChr = randomChr
   topsvg.select("#rect#{randomChr}").attr("fill", pink)
   chrRect.on("click", (d) ->
