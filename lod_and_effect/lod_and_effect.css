@@ -17,6 +17,8 @@ svg {
 text {
  font-family: sans-serif;
  font-size: 11pt;
+ dominant-baseline: middle;
+ text-anchor: middle;
 }
 
 .outerBox {

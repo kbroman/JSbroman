@@ -176,6 +176,80 @@ draw = (data) ->
      .attr("fill", (d) -> chrColor[d])
      .attr("stroke", "none")
 
+  # axes
+  topYaxisGrp = topsvg.append("g")
+  botLYaxisGrp = botsvg.append("g")
+  topXaxisGrp = topsvg.append("g")
+  botLXaxisGrp = botsvg.append("g")
+
+  topYaxisGrp.selectAll("empty")
+    .data(yScale.ticks(10))
+    .enter()
+    .append("line")
+    .attr("y1", (d) -> yScale(d))
+    .attr("y2", (d) -> yScale(d))
+    .attr("x1", pad.left)
+    .attr("x2", pad.left+wInner)
+    .attr("stroke", "white")
+    .attr("fill", "none")
+    .attr("stroke-width", "1")
+
+  topYaxisGrp.selectAll("empty")
+    .data(yScale.ticks(6))
+    .enter()
+    .append("text")
+    .text((d) -> d)
+    .attr("x", pad.left*0.8)
+    .attr("y", (d) -> yScale(d))
+
+  botLYaxisGrp.selectAll("empty")
+    .data(yScale.ticks(10))
+    .enter()
+    .append("line")
+    .attr("y1", (d) -> yScale(d))
+    .attr("y2", (d) -> yScale(d))
+    .attr("x1", pad.left)
+    .attr("x2", pad.left+botLwInner)
+    .attr("stroke", "white")
+    .attr("fill", "none")
+    .attr("stroke-width", "1")
+
+  botLYaxisGrp.selectAll("empty")
+    .data(yScale.ticks(6))
+    .enter()
+    .append("text")
+    .text((d) -> d)
+    .attr("x", pad.left*0.8)
+    .attr("y", (d) -> yScale(d))
+
+  # y-axis labels
+  topYaxisGrp.append("text")
+    .text("LOD score")
+    .attr("x", pad.left/2)
+    .attr("y", pad.top + hInner/2)
+    .attr("transform", "rotate(270,#{pad.left/2},#{pad.top+hInner/2})")
+    .attr("fill", "blue")
+
+  botLYaxisGrp.append("text")
+    .text("LOD score")
+    .attr("x", pad.left/2)
+    .attr("y", pad.top + hInner/2)
+    .attr("transform", "rotate(270,#{pad.left/2},#{pad.top+hInner/2})")
+    .attr("fill", "blue")
+
+  # x-axis labels
+  topXaxisGrp.append("text")
+    .text("Chromosome")
+    .attr("x", pad.left + wInner/2)
+    .attr("y", pad.top + hInner + pad.bottom*0.65)
+    .attr("fill", "blue")
+
+  botLXaxisGrp.append("text")
+    .text("Position (cM)")
+    .attr("x", pad.left + botLwInner/2)
+    .attr("y", pad.top + hInner + pad.bottom*0.65)
+    .attr("fill", "blue")
+
   # lod curves by chr
   lodcurve = (j) ->
       d3.svg.line()
@@ -210,18 +284,16 @@ draw = (data) ->
   botsvg.append("text")
         .attr("x", pad.left + botLwInner/2)
         .attr("y", pad.top/2)
-        .attr("dominant-baseline", "middle")
-        .attr("text-anchor", "middle")
         .text("Chromosome #{randomChr}")
         .attr("id", "botLtitle")
+        .attr("fill", "blue")
 
   botsvg.append("text")
         .attr("x", botLw + pad.left + botRwInner/2)
         .attr("y", pad.top/2)
-        .attr("dominant-baseline", "middle")
-        .attr("text-anchor", "middle")
         .text("")
         .attr("id", "botRtitle")
+        .attr("fill", "blue")
 
   onedig = d3.format(".1f")
 
@@ -283,8 +355,6 @@ draw = (data) ->
     .text((d) -> d)
     .attr("x", (d) -> Math.floor((chrPixelStart[d] + chrPixelEnd[d])/2))
     .attr("y", pad.top + hInner + pad.bottom*0.3)
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "middle")
 
   # black borders
   topsvg.append("rect")
