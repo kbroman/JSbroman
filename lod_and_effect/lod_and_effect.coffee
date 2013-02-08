@@ -162,17 +162,17 @@ draw = (data) ->
           .attr("stroke", "none")
           .attr("stroke-width", "2")
           .attr("opacity", 0)
-          .on("mouseover", ->
-                 d3.select(this).attr("opacity", 1))
-          .on("mouseout", (td) ->
-                 d3.select(this).attr("opacity", markerClick[td]))
-          .on("click", (td) ->
+          .on "mouseover", ->
+                 d3.select(this).attr("opacity", 1)
+          .on "mouseout", (td) ->
+                 d3.select(this).attr("opacity", markerClick[td])
+          .on "click", (td) ->
                  console.log(td)
                  markerClick[lastMarker] = 0
                  d3.select("#circle#{lastMarker}").attr("opacity", 0).attr("fill",purple).attr("stroke","none")
                  lastMarker = td
                  markerClick[td] = 1
-                 d3.select(this).attr("opacity", 1).attr("fill",pink).attr("stroke",purple))
+                 d3.select(this).attr("opacity", 1).attr("fill",pink).attr("stroke",purple)
 
   dotsAtMarkers(randomChr)
 
