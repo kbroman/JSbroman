@@ -135,11 +135,12 @@ draw = (data) ->
        .attr("id", "detailedLod")
        .attr("stroke", "blue")
 
-  last = 0
+  # select of chromosome for lower LOD detailed curve
+  lastChr = 0
   chrRect.on("click", (d) ->
              d3.select(this).attr("fill", "#E9CFEC")
-             topsvg.select("#rect#{last}").attr("fill", chrColor[last]) if last != 0
-             last = d
+             topsvg.select("#rect#{lastChr}").attr("fill", chrColor[lastChr]) if lastChr != 0
+             lastChr = d
              botsvg.select("path#detailedLod")
                 .transition().duration(0)
                 .attr("d", botlodcurve(d)(data.lod[d].pos)))
