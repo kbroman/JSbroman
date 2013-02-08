@@ -151,6 +151,14 @@ draw = (data) ->
         .text("Chromosome #{randomChr}")
         .attr("id", "botLtitle")
 
+  botsvg.append("text")
+        .attr("x", botLw + pad.left + botRwInner/2)
+        .attr("y", pad.top/2)
+        .attr("dominant-baseline", "middle")
+        .attr("text-anchor", "middle")
+        .text("")
+        .attr("id", "botRtitle")
+
   # dots at markers
   dotsAtMarkers = (chr) ->
     markerClick = {}
@@ -175,7 +183,7 @@ draw = (data) ->
           .on "mouseout", (td) ->
                  d3.select(this).attr("opacity", markerClick[td])
           .on "click", (td) ->
-                 console.log(td)
+                 d3.select("text#botRtitle").text(td)
                  markerClick[lastMarker] = 0
                  d3.select("#circle#{lastMarker}").attr("opacity", 0).attr("fill",purple).attr("stroke","none")
                  lastMarker = td
