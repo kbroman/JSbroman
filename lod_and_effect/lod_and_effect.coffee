@@ -58,6 +58,20 @@ draw = (data) ->
     currentMax = d3.max(data.lod[i].lod)
     maxLod = currentMax if maxLod < currentMax
 
+  # maximum effect + SE and minimum effect - SE
+  effMax = null
+  effMin = null
+  for mar of data.effects
+    for g of data.effects[mar].Means
+      for sex of data.effects[mar].Means[g]
+        me = data.effects[mar].Means[g][sex]
+        se = data.effects[mar].SEs[g][sex]
+        if me isnt null
+          top = me + se
+          bot = me - se
+          effMax = top if effMax is null or effMax < top
+          effMin = bot if effMin is null or effMin > bot
+
   # start and end of each chromosome
   chrStart = {}
   chrEnd = {}
@@ -98,6 +112,56 @@ draw = (data) ->
     else
       chrColor[i] = darkGray
 
+  botRyScale = d3.scale.linear()
+                 .domain([effMin, effMax])
+                 .range([pad.top+5, pad.top+hInner-5])
+
+  effectPlot = (chr, mar) ->
+    botsvg.selectAll(".effectplot").remove()
+    mean = []
+    lo = []
+    hi = []
+    male = []
+    for sex in ["Female", "Male"]
+      for g of data.effects[mar].Means
+        me = data.effects[mar].Means[g][sex]
+        se = data.effects[mar].SEs[g][sex]
+        if me isnt null
+          mean.push(me)
+          lo.push(me-se)
+          hi.push(me+se)
+          male.push(sex is "Male")
+     botRxScale = d3.scale.ordinal()
+         .domain(d3.range(mean.length))
+         .rangePoints([pad.left+botLw, pad.left+wInner], 1)
+     effplot = botsvg.append("g")
+
+     effplot.selectAll("empty")
+         .data(mean)
+         .enter()
+         .append("line")
+         .attr("class", "effectplot")
+         .attr("x1", (d,i) -> botRxScale(i))
+         .attr("x2", (d,i) -> botRxScale(i))
+         .attr("y1", (d,i) -> botRyScale(lo[i]))
+         .attr("y2", (d,i) -> botRyScale(hi[i]))
+         .attr("fill", "none")
+         .attr("stroke", "black")
+         .attr("stroke-width", "2")
+
+     effplot.selectAll("empty")
+         .data(mean)
+         .enter()
+         .append("circle")
+         .attr("class", "effectplot")
+         .attr("cx", (d,i) -> botRxScale(i))
+         .attr("cy", (d) -> botRyScale(d))
+         .attr("r", 6)
+         .attr("fill", (d,i) ->
+            return "blue" if male[i]
+            "red")
+         .attr("stroke", "black")
+         .attr("stroke-width", "2")
 
   # background rectangles for each chromosome, alternate color
   chrRect = topsvg.append("g").selectAll("empty")
@@ -159,6 +223,8 @@ draw = (data) ->
         .text("")
         .attr("id", "botRtitle")
 
+  onedig = d3.format(".1f")
+
   # dots at markers
   dotsAtMarkers = (chr) ->
     markerClick = {}
@@ -183,12 +249,15 @@ draw = (data) ->
           .on "mouseout", (td) ->
                  d3.select(this).attr("opacity", markerClick[td])
           .on "click", (td) ->
-                 d3.select("text#botRtitle").text(td)
+                 pos = data.lod[chr].pos[data.markerindex[chr][td]]
+                 title = "#{td} (chr #{chr}, #{onedig(pos)} cM)"
+                 d3.select("text#botRtitle").text(title)
                  markerClick[lastMarker] = 0
                  d3.select("#circle#{lastMarker}").attr("opacity", 0).attr("fill",purple).attr("stroke","none")
                  lastMarker = td
                  markerClick[td] = 1
                  d3.select(this).attr("opacity", 1).attr("fill",pink).attr("stroke",purple)
+                 effectPlot chr, td
 
   dotsAtMarkers(randomChr)
 
