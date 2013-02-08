@@ -179,14 +179,15 @@ draw = (data) ->
   # select chromosome for lower LOD detailed curve
   lastChr = randomChr
   topsvg.select("#rect#{randomChr}").attr("fill", pink)
-  chrRect.on("click", (d) ->
+  chrRect.on "click", (d) ->
              d3.select(this).attr("fill", pink)
-             topsvg.select("#rect#{lastChr}").attr("fill", chrColor[lastChr]) if lastChr != 0
-             lastChr = d
-             botsvg.select("path#detailedLod")
-                .attr("d", botlodcurve(d)(data.lod[d].pos))
-             botsvg.selectAll("circle.markercircle").remove()
-             dotsAtMarkers(d))
+             if lastChr != d
+               topsvg.select("#rect#{lastChr}").attr("fill", chrColor[lastChr]) if lastChr != 0
+               lastChr = d
+               botsvg.select("path#detailedLod")
+                  .attr("d", botlodcurve(d)(data.lod[d].pos))
+               botsvg.selectAll("circle.markercircle").remove()
+               dotsAtMarkers(d)
 
 
   # chr labels
