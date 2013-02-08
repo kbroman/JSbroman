@@ -143,6 +143,14 @@ draw = (data) ->
        .attr("stroke", "blue")
        .style("pointer-events", "none")
 
+  botsvg.append("text")
+        .attr("x", pad.left + botLwInner/2)
+        .attr("y", pad.top/2)
+        .attr("dominant-baseline", "middle")
+        .attr("text-anchor", "middle")
+        .text("Chromosome #{randomChr}")
+        .attr("id", "botLtitle")
+
   # dots at markers
   dotsAtMarkers = (chr) ->
     markerClick = {}
@@ -188,7 +196,7 @@ draw = (data) ->
                   .attr("d", botlodcurve(d)(data.lod[d].pos))
                botsvg.selectAll("circle.markercircle").remove()
                dotsAtMarkers(d)
-
+               d3.select("text#botLtitle").text("Chromosome  #{d}")
 
   # chr labels
   topsvg.append("g").selectAll("empty")
