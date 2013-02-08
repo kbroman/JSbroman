@@ -23,6 +23,8 @@ draw = (data) ->
 
   lightGray = d3.rgb(230, 230, 230)
   darkGray = d3.rgb(200, 200, 200)
+  pink = "#E9CFEC"
+  purple = "#8C4374"
 
   # gray backgrounds
   topsvg.append("rect")
@@ -31,6 +33,7 @@ draw = (data) ->
      .attr("height", hInner)
      .attr("width", wInner)
      .attr("class", "innerBox")
+     .style("pointer-events", "none")
 
   botsvg.append("rect")
      .attr("x", pad.left)
@@ -38,6 +41,7 @@ draw = (data) ->
      .attr("height", hInner)
      .attr("width", botLwInner)
      .attr("class", "innerBox")
+     .style("pointer-events", "none")
 
   botsvg.append("rect")
      .attr("x", botLw+pad.left)
@@ -45,6 +49,7 @@ draw = (data) ->
      .attr("height", hInner)
      .attr("width", botRwInner)
      .attr("class", "innerBox")
+     .style("pointer-events", "none")
 
 
   # maximum LOD score
@@ -136,19 +141,74 @@ draw = (data) ->
        .attr("class", "thickline")
        .attr("id", "detailedLod")
        .attr("stroke", "blue")
+       .style("pointer-events", "none")
 
+  # dots at markers
+  markerClick = {}
+  for m in data.markers[randomChr]
+    markerClick[m] = 0
+  lastMarker = ""
+  markerCircle = botsvg.append("g").selectAll("empty")
+        .data(data.markers[randomChr])
+        .enter()
+        .append("circle")
+        .attr("class", "markercircle")
+        .attr("id", (td) -> "circle#{td}")
+        .attr("cx", (td) -> botLxScale[randomChr](data.lod[randomChr].pos[data.markerindex[randomChr][td]]))
+        .attr("cy", (td) -> yScale(data.lod[randomChr].lod[data.markerindex[randomChr][td]]))
+        .attr("r", 6)
+        .attr("fill", purple)
+        .attr("stroke", "none")
+        .attr("opacity", 0)
+        .on("mouseover", ->
+               d3.select(this).attr("opacity", 1))
+        .on("mouseout", (td) ->
+               d3.select(this).attr("opacity", markerClick[td]))
+        .on("click", (td) ->
+               console.log(td)
+               markerClick[lastMarker] = 0
+               d3.select("#circle#{lastMarker}").attr("opacity", 0)
+               lastMarker = td
+               markerClick[td] = 1
+               d3.select(this).attr("opacity", 1))
 
   # select of chromosome for lower LOD detailed curve
   lastChr = randomChr
-  topsvg.select("#rect#{randomChr}").attr("fill", "#E9CFEC")
+  topsvg.select("#rect#{randomChr}").attr("fill", pink)
   chrRect.on("click", (d) ->
-             d3.select(this).attr("fill", "#E9CFEC")
+             d3.select(this).attr("fill", pink)
              topsvg.select("#rect#{lastChr}").attr("fill", chrColor[lastChr]) if lastChr != 0
              lastChr = d
              botsvg.select("path#detailedLod")
-                .transition().duration(0)
-                .attr("d", botlodcurve(d)(data.lod[d].pos)))
-
+                .attr("d", botlodcurve(d)(data.lod[d].pos))
+             botsvg.selectAll("circle.markercircle").remove()
+             markerClick = {}
+             for m in data.markers[d]
+               markerClick[m] = 0
+             lastMarker = ""
+             markerCircle = botsvg.append("g").selectAll("empty")
+                .data(data.markers[d])
+                .enter()
+                .append("circle")
+                .attr("class", "markercircle")
+                .attr("id", (td) -> "circle#{td}")
+                .attr("cx", (td) -> botLxScale[d](data.lod[d].pos[data.markerindex[d][td]]))
+                .attr("cy", (td) -> yScale(data.lod[d].lod[data.markerindex[d][td]]))
+                .attr("r", 6)
+                .attr("fill", purple)
+                .attr("stroke", "none")
+                .attr("opacity", 0)
+                .on("mouseover", (td) ->
+                       d3.select(this).attr("opacity", 1))
+                .on("mouseout", (td) ->
+                       d3.select(this).attr("opacity", markerClick[td]))
+                .on("click", (td) ->
+                       console.log(td)
+                       markerClick[lastMarker] = 0
+                       d3.select("#circle#{lastMarker}").attr("opacity", 0)
+                       lastMarker = td
+                       markerClick[td] = 1
+                       d3.select(this).attr("opacity", 1)))
 
   # chr labels
   topsvg.append("g").selectAll("empty")
@@ -168,6 +228,7 @@ draw = (data) ->
      .attr("height", hInner)
      .attr("width", wInner)
      .attr("class", "outerBox")
+     .style("pointer-events", "none")
 
   botsvg.append("rect")
      .attr("x", pad.left)
@@ -175,6 +236,7 @@ draw = (data) ->
      .attr("height", hInner)
      .attr("width", botLwInner)
      .attr("class", "outerBox")
+     .style("pointer-events", "none")
 
   botsvg.append("rect")
      .attr("x", botLw+pad.left)
@@ -182,6 +244,7 @@ draw = (data) ->
      .attr("height", hInner)
      .attr("width", botRwInner)
      .attr("class", "outerBox")
+     .style("pointer-events", "none")
 
 
 # load json file and call draw function
