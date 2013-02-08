@@ -105,8 +105,8 @@ draw = (data) ->
                   .domain([chrStart[i], chrEnd[i]])
                   .range([chrPixelStart[i], chrPixelEnd[i]])
     botLxScale[i] = d3.scale.linear()
-                  .domain([chrStart[i], chrEnd[i]])
-                  .range([pad.left + chrGap/2, pad.left + botLwInner - chrGap/2])
+                  .domain([0, chrEnd[i]])
+                  .range([pad.left, pad.left + botLwInner - chrGap/2])
     if i % 2
       chrColor[i] = lightGray
     else
@@ -295,6 +295,29 @@ draw = (data) ->
         .attr("id", "botRtitle")
         .attr("fill", "blue")
 
+  botLXaxisGrp.selectAll("empty")
+              .data(botLxScale[randomChr].ticks(10))
+              .enter()
+              .append("line")
+              .attr("class", "botLXaxis")
+              .attr("y1", pad.top)
+              .attr("y2", pad.top+hInner)
+              .attr("x1", (td) -> botLxScale[randomChr](td))
+              .attr("x2", (td) -> botLxScale[randomChr](td))
+              .attr("stroke", darkGray)
+              .attr("fill", "none")
+              .attr("stroke-width", "1")
+
+  botLXaxisGrp.selectAll("empty")
+              .data(botLxScale[randomChr].ticks(10))
+              .enter()
+              .append("text")
+              .attr("class", "botLXaxis")
+              .text((td) -> td)
+              .attr("y", pad.top + hInner + pad.bottom*0.25)
+              .attr("x", (td) -> botLxScale[randomChr](td))
+
+
   onedig = d3.format(".1f")
 
   # dots at markers
@@ -345,7 +368,28 @@ draw = (data) ->
                   .attr("d", botlodcurve(d)(data.lod[d].pos))
                botsvg.selectAll("circle.markercircle").remove()
                dotsAtMarkers(d)
-               d3.select("text#botLtitle").text("Chromosome  #{d}")
+               d3.select("text#botLtitle").text("Chromosome #{d}")
+               botLXaxisGrp.selectAll(".botLXaxis").remove()
+               botLXaxisGrp.selectAll("empty")
+                           .data(botLxScale[d].ticks(10))
+                           .enter()
+                           .append("line")
+                           .attr("class", "botLXaxis")
+                           .attr("y1", pad.top)
+                           .attr("y2", pad.top+hInner)
+                           .attr("x1", (td) -> botLxScale[d](td))
+                           .attr("x2", (td) -> botLxScale[d](td))
+                           .attr("stroke", darkGray)
+                           .attr("fill", "none")
+                           .attr("stroke-width", "1")
+               botLXaxisGrp.selectAll("empty")
+                           .data(botLxScale[d].ticks(10))
+                           .enter()
+                           .append("text")
+                           .attr("class", "botLXaxis")
+                           .text((td) -> td)
+                           .attr("y", pad.top + hInner + pad.bottom*0.25)
+                           .attr("x", (td) -> botLxScale[d](td))
 
   # chr labels
   topsvg.append("g").selectAll("empty")
