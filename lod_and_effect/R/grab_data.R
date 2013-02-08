@@ -32,7 +32,16 @@ for(i in seq(along=qtleffects)) {
   qtleffects[[i]]$SEs <- lapply(as.list(as.data.frame(qtleffects[[i]]$SEs)), function(a) {names(a) <- c("Female", "Male"); a})
   names(qtleffects[[i]]$Means) <- names(qtleffects[[i]]$SEs) <- c("BB", "BR", "RR")
 }
-  
+
+# marker index within lod curves
+map <- pull.map(f2g)
+outspl <- split(out, out[,1])
+mar <- map
+for(i in seq(along=map)) {
+  mar[[i]] <- match(names(map[[i]]), rownames(outspl[[i]]))-1
+  names(mar[[i]]) <- names(map[[i]])
+}
+markers <- lapply(mar, names)
 
 # write data to JSON file
 library(RJSONIO)
@@ -41,7 +50,7 @@ cat0a <- function(...) cat(..., sep="", file="../insulinlod.json", append=TRUE)
 cat0("{\n\n")
 cat0a("\"chr\" :\n", toJSON(chrnames(f2g)), ",\n\n")
 cat0a("\"lod\" :\n", toJSON(lapply(split(out, out[,1]), function(a) as.list(a[,2:3])), digits=8), ",\n\n")
-cat0a("\"map\" :\n", toJSON(pull.map(f2g), digits=16), ",\n\n")
-cat0a("\"markers\" :\n", toJSON(markernames(f2g)), ",\n\n")
+cat0a("\"markerindex\" :\n", toJSON(mar), ",\n\n")
+cat0a("\"markers\" :\n", toJSON(markers), ",\n\n")
 cat0a("\"effects\" :\n", toJSON(qtleffects, digits=8), "\n\n")
 cat0a("}\n")
