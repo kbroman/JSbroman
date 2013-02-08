@@ -4,6 +4,8 @@
 attach("~/Projects/Attie/GoldStandard/FinalData/aligned_geno_with_pmap.RData")
 attach("~/Projects/Attie/GoldStandard/FinalData/lipomics_final_rev2.RData")
 
+phenotype <- "Insulin (ng/ml) 10 wk"
+
 library(lineup)
 id <- findCommonID(f2g$pheno$MouseNum, lipomics$MouseNum)
 f2g <- f2g[,id$first]
@@ -47,7 +49,7 @@ markers <- lapply(mar, names)
 library(RJSONIO)
 cat0 <- function(...) cat(..., sep="", file="../insulinlod.json")
 cat0a <- function(...) cat(..., sep="", file="../insulinlod.json", append=TRUE)
-cat0("{\n\n")
+cat0("{\n\"phenotype\" : \"", phenotype, "\",\n\n")
 cat0a("\"chr\" :\n", toJSON(chrnames(f2g)), ",\n\n")
 cat0a("\"lod\" :\n", toJSON(lapply(split(out, out[,1]), function(a) as.list(a[,2:3])), digits=8), ",\n\n")
 cat0a("\"markerindex\" :\n", toJSON(mar), ",\n\n")
