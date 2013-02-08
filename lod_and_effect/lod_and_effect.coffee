@@ -99,6 +99,7 @@ draw = (data) ->
      .data(data.chr)
      .enter()
      .append("rect")
+     .attr("id", (d) -> "rect#{d}")
      .attr("x", (d) -> chrPixelStart[d] - chrGap/2)
      .attr("y", pad.top)
      .attr("width", (d) -> chrPixelEnd[d] - chrPixelStart[d]+chrGap)
@@ -128,21 +129,21 @@ draw = (data) ->
           .x((d) -> botLxScale[j](d))
           .y((d,i) -> yScale(data.lod[j].lod[i]))
 
-  detailedLod = {}
-  for i in data.chr
-    detailedLod[i] = botsvg.append("g").append("path")
-       .datum(data.lod[i].pos)
-       .attr("d", botlodcurve(i))
+  botsvg.append("g").append("path")
+       .attr("d", botlodcurve("2")(data.lod["2"].pos))
        .attr("class", "thickline")
+       .attr("id", "detailedLod")
        .attr("stroke", "blue")
-       .attr("opacity", 0)
 
-  chrRect.on("mouseover", (d) ->
+  last = 0
+  chrRect.on("click", (d) ->
              d3.select(this).attr("fill", "#E9CFEC")
-             detailedLod[d].attr("opacity", 1))
-         .on("mouseout", (d) ->
-             d3.select(this).attr("fill", chrColor[d])
-             detailedLod[d].attr("opacity", 0))
+             topsvg.select("#rect#{last}").attr("fill", chrColor[last]) if last != 0
+             last = d
+             botsvg.select("path#detailedLod")
+                .transition().duration(0)
+                .attr("d", botlodcurve(d)(data.lod[d].pos)))
+
 
   # chr labels
   topsvg.append("g").selectAll("empty")
