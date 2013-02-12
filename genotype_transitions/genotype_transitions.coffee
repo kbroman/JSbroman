@@ -57,6 +57,64 @@ draw = (data) ->
                  .domain([pheMin, pheMax])
                  .range([pad.top + hInner*0.98, pad.top + hInner*0.02])
 
+  # axes
+  Xaxis = rightsvg.append("g")
+  Yaxis = rightsvg.append("g")
+
+  Yaxis.selectAll("empty")
+       .data(yScale.ticks(10))
+       .enter()
+       .append("line")
+       .attr("y1", (d) -> yScale(d))
+       .attr("y2", (d) -> yScale(d))
+       .attr("x1", pad.left)
+       .attr("x2", pad.left+wInner)
+       .attr("stroke", "white")
+       .attr("fill", "none")
+       .attr("stroke-width", "1")
+       .style("pointer-events", "none")
+  onedig = d3.format(".1f")
+  Yaxis.selectAll("empty")
+       .data(yScale.ticks(10))
+       .enter()
+       .append("text")
+       .text((d) -> onedig(d))
+       .attr("y", (d) -> yScale(d))
+       .attr("x", pad.left*0.7)
+  Yaxis.append("text")
+       .text("phenotype")
+       .attr("y", pad.top + hInner/2)
+       .attr("x", pad.left*0.3)
+       .attr("transform","rotate(270,#{pad.left*0.3},#{pad.top+hInner/2})")
+       .attr("fill", "blue")
+
+
+  Xaxis.selectAll("empty")
+       .data(data.genonames)
+       .enter()
+       .append("line")
+       .attr("x1", (d,i) -> xScale(i))
+       .attr("x2", (d,i) -> xScale(i))
+       .attr("y1", pad.top)
+       .attr("y2", pad.top+hInner)
+       .attr("stroke", darkGray)
+       .attr("fill", "none")
+       .attr("stroke-width", "1")
+       .style("pointer-events", "none")
+  Xaxis.selectAll("empty")
+       .data(data.genonames)
+       .enter()
+       .append("text")
+       .text((d) -> d)
+       .attr("y", pad.top + hInner + pad.bottom*0.3)
+       .attr("x", (d,i) -> xScale(i))
+  Xaxis.append("text")
+       .text("genotype")
+       .attr("y", pad.top + hInner + pad.bottom*0.7)
+       .attr("x", pad.left + wInner/2)
+       .attr("fill", "blue")
+
+
   # keep track of which marker is clicked
   clicked = {}
   for m of data.markers
@@ -77,6 +135,7 @@ draw = (data) ->
           .text(curMarker)
           .attr("x", pad.left + wInner/2)
           .attr("y", pad.top/2)
+          .attr("fill", "blue")
 
   # mouseover/mouseout for selecting markers
   mouseover = (m) ->
