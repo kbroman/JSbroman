@@ -19,7 +19,13 @@ text {
  font-size: 11pt;
  dominant-baseline: middle;
  text-anchor: middle;
+ dominant-baseline: middle;
 }
+
+text.alignright {
+ text-anchor: end;
+}
+
 
 .outerBox {
   stroke: black;
