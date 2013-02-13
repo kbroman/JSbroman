@@ -31,10 +31,15 @@ text.alignright {
   stroke: black;
   stroke-width: 2;
   fill: none;
+  pointer-events: none;
 }
 
 .innerBox {
   fill: rgb(230, 230, 230);
   stroke: none;
+  pointer-events: none;
 }
 
+.axis {
+  pointer-events: none;
+}

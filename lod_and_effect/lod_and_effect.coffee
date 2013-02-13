@@ -4,62 +4,56 @@ draw = (data) ->
   # dimensions of SVG
   w = 1350
   h = 450
-  pad = {left:60, top:20, right:40, bottom: 40}
-  wInner = w - pad.left - pad.right
-  hInner = h - pad.top - pad.bottom
-  chrGap = 8
   botLw = 650
-  botLwInner = botLw - pad.left - pad.right
+  pad = {left:60, top:20, right:40, bottom: 40}
+  innerPad = 4
+  wInner = []
+  wInner[0] = w - pad.left - pad.right
+  hInner = []
+  for i in [0..3]
+    hInner[i] = h - pad.top - pad.bottom
+  chrGap = 8
+
+  wInner[1] = botLw - pad.left - pad.right
   botRw = (w - botLw)/2
-  botRwInner = botRw - pad.left - pad.right
+  wInner[2] = botRw - pad.left - pad.right
+  wInner[3] = wInner[2]
 
-  topLeft = pad.left
-  topRight = pad.left + wInner
-  botLeft =  [pad.left, botLw + pad.left, botLw + botRw + pad.left]
-  botRight = [pad.left+botLwInner, botLw + pad.left+botRwInner, botLw + botRw + pad.left + botRwInner]
+  # left, right, top, bottom positions for each
+  # of the four panels
+  left = [pad.left, pad.left, botLw + pad.left, botLw + botRw + pad.left]
+  right = []
+  for i in [0..3]
+    right[i] = left[i] + wInner[i]
+  top = []
+  bottom = []
+  for i in [0..3]
+    top[i] = pad.top
+    bottom[i] = pad.top + hInner[i]
 
-  topsvg = d3.select("body").append("svg")
-          .attr("width", w)
-          .attr("height", h)
-
-  botsvg = d3.select("body").append("svg")
-          .attr("width", w)
-          .attr("height", h)
-
+  # colors definitions
   lightGray = d3.rgb(230, 230, 230)
   darkGray = d3.rgb(200, 200, 200)
   pink = "#E9CFEC"
   purple = "#8C4374"
 
+  # create SVGs
+  topsvg = d3.select("body").append("svg")
+          .attr("width", w)
+          .attr("height", h)
+  botsvg = d3.select("body").append("svg")
+          .attr("width", w)
+          .attr("height", h)
+  svgs = [topsvg, botsvg, botsvg, botsvg]
+
   # gray backgrounds
-  topsvg.append("rect")
-     .attr("x", pad.left)
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", wInner)
-     .attr("class", "innerBox")
-     .style("pointer-events", "none")
-  botsvg.append("rect")
-     .attr("x", pad.left)
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", botLwInner)
-     .attr("class", "innerBox")
-     .style("pointer-events", "none")
-  botsvg.append("rect")
-     .attr("x", botLeft[1])
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", botRwInner)
-     .attr("class", "innerBox")
-     .style("pointer-events", "none")
-  botsvg.append("rect")
-     .attr("x", botLeft[2])
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", botRwInner)
-     .attr("class", "innerBox")
-     .style("pointer-events", "none")
+  for j in [0..3]
+    svgs[j].append("rect")
+           .attr("x", left[j])
+           .attr("y", top[j])
+           .attr("height", hInner[j])
+           .attr("width", wInner[j])
+           .attr("class", "innerBox")
 
   # maximum LOD score
   maxLod = 0
@@ -76,11 +70,12 @@ draw = (data) ->
         me = data.effects[mar].Means[g][sex]
         se = data.effects[mar].SEs[g][sex]
         if me isnt null
-          top = me + se
-          bot = me - se
-          effMax = top if effMax is null or effMax < top
-          effMin = bot if effMin is null or effMin > bot
+          up = me + se
+          lo = me - se
+          effMax = up if effMax is null or effMax < up
+          effMin = lo if effMin is null or effMin > lo
 
+  # phenotype max and min
   pheMax = d3.max(data.phevals)
   pheMin = d3.min(data.phevals)
 
@@ -100,45 +95,45 @@ draw = (data) ->
   cur = Math.round(pad.left + chrGap/2)
   for i in data.chr
     chrPixelStart[i] = cur
-    chrPixelEnd[i] = cur + Math.round((wInner-chrGap*(data.chr.length))/totalChrLength*chrLength[i])
+    chrPixelEnd[i] = cur + Math.round((wInner[0]-chrGap*(data.chr.length))/totalChrLength*chrLength[i])
     cur = chrPixelEnd[i] + chrGap
 
   # vertical scales
-  yScale = d3.scale.linear()
-             .domain([0, maxLod*1.02])
-             .range([hInner+pad.top, pad.top])
+  xScale = []
+  yScale = []
+  yScale[0] = d3.scale.linear()
+                .domain([0, maxLod*1.02])
+                .range([bottom[0], top[0]])
+  yScale[1] = yScale[0]
 
   # chromosome-specific horizontal scales
-  xScale = {}
-  botLxScale = {}
+  xScale[0] = {}
+  xScale[1] = {}
   chrColor = {}
   for i in data.chr
-    xScale[i] = d3.scale.linear()
-                  .domain([chrStart[i], chrEnd[i]])
-                  .range([chrPixelStart[i], chrPixelEnd[i]])
-    botLxScale[i] = d3.scale.linear()
-                  .domain([0, chrEnd[i]])
-                  .range([pad.left, pad.left + botLwInner - chrGap/2])
+    xScale[0][i] = d3.scale.linear()
+                     .domain([chrStart[i], chrEnd[i]])
+                     .range([chrPixelStart[i], chrPixelEnd[i]])
+    xScale[1][i] = d3.scale.linear()
+                     .domain([0, chrEnd[i]])
+                     .range([left[1]+innerPad, right[1]-innerPad])
     if i % 2
       chrColor[i] = lightGray
     else
       chrColor[i] = darkGray
 
-  botMyScale = d3.scale.linear()
-                 .domain([effMin, effMax])
-                 .range([pad.top+hInner-5, pad.top+5])
-  botRyScale = d3.scale.linear()
-                 .domain([pheMin, pheMax])
-                 .range([pad.top+hInner-5, pad.top+5])
+  yScale[2] = d3.scale.linear()
+                .domain([effMin, effMax])
+                .range([bottom[2]-innerPad, top[2]+innerPad])
+  yScale[3] = d3.scale.linear()
+                .domain([pheMin, pheMax])
+                .range([bottom[3]-innerPad, top[3]+innerPad])
 
   average = (x) ->
     sum = 0
     for xv in x
       sum += xv
     sum / x.length
-
-  botMXaxisGrp = botsvg.append("g")
-  botRXaxisGrp = botsvg.append("g")
 
   effectPlot = (chr, mar) ->
     botsvg.selectAll(".effectplot").remove()
@@ -158,82 +153,55 @@ draw = (data) ->
           male.push(sex is "Male")
           genotypes.push(g)
 
-     botMxScale = d3.scale.ordinal()
-         .domain(d3.range(mean.length))
-         .rangePoints([botLeft[1], botRight[1]], 1)
-     botRxScale = d3.scale.ordinal()
-         .domain(d3.range(mean.length))
-         .rangePoints([botLeft[2], botRight[2]], 1)
+     xScale[2] = d3.scale.ordinal()
+                   .domain(d3.range(mean.length))
+                   .rangePoints([left[2], right[2]], 1)
+     xScale[3] = d3.scale.ordinal()
+                   .domain(d3.range(mean.length))
+                   .rangePoints([left[3], right[3]], 1)
 
-     femaleloc = []
-     maleloc = []
+     femaleloc2 = []
+     femaleloc3 = []
+     maleloc2 = []
+     maleloc3 = []
      for i of mean
        if male[i]
-         maleloc.push(botMxScale(i))
+         maleloc2.push(xScale[2](i))
+         maleloc3.push(xScale[3](i))
        else
-         femaleloc.push(botMxScale(i))
-     aves = [average(femaleloc), average(maleloc)]
-
-     botMXaxisGrp.selectAll(".botMXaxis").remove()
-     botRXaxisGrp.selectAll(".botRXaxis").remove()
-
-     botMXaxisGrp.selectAll("empty")
-                 .data(d3.range(mean.length))
-                 .enter()
-                 .append("line")
-                 .attr("class", "botMXaxis")
-                 .attr("y1", pad.top)
-                 .attr("y2", pad.top+hInner)
-                 .attr("x1", (td) -> botMxScale(td))
-                 .attr("x2", (td) -> botMxScale(td))
-                 .attr("stroke", darkGray)
-                 .attr("fill", "none")
-                 .attr("stroke-width", "1")
-     botMXaxisGrp.selectAll("empty")
-                 .data(d3.range(mean.length))
-                 .enter()
-                 .append("text")
-                 .attr("class", "botMXaxis")
-                 .text((td) -> genotypes[td])
-                 .attr("y", pad.top + hInner + pad.bottom*0.25)
-                 .attr("x", (td) -> botMxScale(td))
-     botMXaxisGrp.selectAll("empty")
-                 .data(aves)
-                 .enter()
-                 .append("text")
-                 .attr("class", "botMXaxis")
-                 .text((td,i) -> ["Female", "Male"][i])
-                 .attr("y", pad.top + hInner + pad.bottom*0.75)
-                 .attr("x", (td) -> td)
-
-     botRXaxisGrp.selectAll("empty")
-                 .data(d3.range(mean.length))
-                 .enter()
-                 .append("line")
-                 .attr("class", "botRXaxis")
-                 .attr("y1", pad.top)
-                 .attr("y2", pad.top+hInner)
-                 .attr("x1", (td) -> botRxScale(td))
-                 .attr("x2", (td) -> botRxScale(td))
-                 .attr("stroke", darkGray)
-                 .attr("fill", "none")
-                 .attr("stroke-width", "1")
-     botRXaxisGrp.selectAll("empty")
-                 .data(d3.range(mean.length))
-                 .enter()
-                 .append("text")
-                 .attr("class", "botRXaxis")
-                 .text((td) -> genotypes[td])
-                 .attr("y", pad.top + hInner + pad.bottom*0.25)
-                 .attr("x", (td) -> botRxScale(td))
-     botRXaxisGrp.selectAll("empty")
-                 .data(aves)
-                 .enter()
-                 .append("text")
-                 .attr("class", "botRXaxis")
-                 .text((td,i) -> ["Female", "Male"][i])
-                 .attr("y", pad.top + hInner + pad.bottom*0.75)
-                 .attr("x", (td) -> td + botRw)
+         femaleloc2.push(xScale[2](i))
+         femaleloc3.push(xScale[3](i))
+     aves = [[average(femaleloc2), average(maleloc2)], [average(femaleloc3), average(maleloc3)]]
+     
+     # lower middle and lower right X axes
+     for j in [2..3]
+       XaxisGrp[j].selectAll("line").remove()
+       XaxisGrp[j].selectAll("text").remove()
+       XaxisGrp[j].selectAll("empty")
+                  .data(d3.range(mean.length))
+                  .enter()
+                  .append("line")
+                  .attr("y1", top[j])
+                  .attr("y2", bottom[j])
+                  .attr("x1", (td) -> xScale[j](td))
+                  .attr("x2", (td) -> xScale[j](td))
+                  .attr("stroke", darkGray)
+                  .attr("fill", "none")
+                  .attr("stroke-width", "1")
+       XaxisGrp[j].selectAll("empty")
+                  .data(d3.range(mean.length))
+                  .enter()
+                  .append("text")
+                  .text((td) -> genotypes[td])
+                  .attr("y", bottom[j] + pad.bottom*0.25)
+                  .attr("x", (td) -> xScale[j](td))
+       XaxisGrp[j].selectAll("empty")
+                  .data(aves[j-2])
+                  .enter()
+                  .append("text")
+                  .text((td,i) -> ["Female", "Male"][i])
+                  .attr("y", bottom[j] + pad.bottom*0.75)
+                  .attr("x", (td) -> td)
 
      effplot = botsvg.append("g")
 
@@ -242,10 +210,10 @@ draw = (data) ->
          .enter()
          .append("line")
          .attr("class", "effectplot")
-         .attr("x1", (d,i) -> botMxScale(i))
-         .attr("x2", (d,i) -> botMxScale(i))
-         .attr("y1", (d,i) -> botMyScale(lo[i]))
-         .attr("y2", (d,i) -> botMyScale(hi[i]))
+         .attr("x1", (d,i) -> xScale[2](i))
+         .attr("x2", (d,i) -> xScale[2](i))
+         .attr("y1", (d,i) -> yScale[2](lo[i]))
+         .attr("y2", (d,i) -> yScale[2](hi[i]))
          .attr("fill", "none")
          .attr("stroke", "black")
          .attr("stroke-width", "2")
@@ -255,8 +223,8 @@ draw = (data) ->
          .enter()
          .append("circle")
          .attr("class", "effectplot")
-         .attr("cx", (d,i) -> botMxScale(i))
-         .attr("cy", (d) -> botMyScale(d))
+         .attr("cx", (d,i) -> xScale[2](i))
+         .attr("cy", (d) -> yScale[2](d))
          .attr("r", 6)
          .attr("fill", (d,i) ->
             return "blue" if male[i]
@@ -273,156 +241,77 @@ draw = (data) ->
      .attr("x", (d) -> chrPixelStart[d] - chrGap/2)
      .attr("y", pad.top)
      .attr("width", (d) -> chrPixelEnd[d] - chrPixelStart[d]+chrGap)
-     .attr("height", (d) -> hInner)
+     .attr("height", (d) -> hInner[0])
      .attr("fill", (d) -> chrColor[d])
      .attr("stroke", "none")
 
-  # axes
-  topXaxisGrp = topsvg.append("g")
-  botLXaxisGrp = botsvg.append("g")
-  botMXaxisGrp = botsvg.append("g")
-  botRXaxisGrp = botsvg.append("g")
-  topYaxisGrp = topsvg.append("g")
-  botLYaxisGrp = botsvg.append("g")
-  botMYaxisGrp = botsvg.append("g")
-  botRYaxisGrp = botsvg.append("g")
+  # groups to hold all of the xAxis elements
+  XaxisGrp = []
+  YaxisGrp = []
+  for j in [0..3]
+    XaxisGrp[j] = svgs[j].append("g").attr("id", "Xaxis#{j}").attr("class", "axis")
+    YaxisGrp[j] = svgs[j].append("g").attr("id", "Yaxis#{j}").attr("class", "axis")
 
-  topYaxisGrp.selectAll("empty")
-    .data(yScale.ticks(10))
-    .enter()
-    .append("line")
-    .attr("y1", (d) -> yScale(d))
-    .attr("y2", (d) -> yScale(d))
-    .attr("x1", pad.left)
-    .attr("x2", pad.left+wInner)
-    .attr("stroke", "white")
-    .attr("fill", "none")
-    .attr("stroke-width", "1")
+  nTicks = [10, 10, 6, 6]
+  nLabels = [6, 6, 6, 6]
+  padMult = [0.15, 0.15, 0.25, 0.05]
+  for j in [0..3]
+    YaxisGrp[j].selectAll("empty")
+               .data(yScale[j].ticks(nTicks[j]))
+               .enter()
+               .append("line")
+               .attr("y1", (d) -> yScale[j](d))
+               .attr("y2", (d) -> yScale[j](d))
+               .attr("x1", left[j])
+               .attr("x2", right[j])
+               .attr("stroke", "white")
+               .attr("fill", "none")
+               .attr("stroke-width", "1")
+    YaxisGrp[j].selectAll("empty")
+               .data(yScale[j].ticks(nLabels[j]))
+               .enter()
+               .append("text")
+               .text((d) -> d)
+               .attr("x", left[j] - pad.left*padMult[j])
+               .attr("y", (d) -> yScale[j](d))
+               .attr("class",
+                   if j == 3
+                      "alignright"
+                   else
+                      "axis")
 
-  topYaxisGrp.selectAll("empty")
-    .data(yScale.ticks(6))
-    .enter()
-    .append("text")
-    .text((d) -> d)
-    .attr("x", pad.left*0.8)
-    .attr("y", (d) -> yScale(d))
+  # y-axis titles
+  ylab = ["LOD score", "LOD score", data.phenotype, data.phenotype]
+  xpos = [pad.left/2, pad.left/2, left[2]-pad.left*0.6, left[3]-pad.left*0.7]
+  for j in [0..3]
+    YaxisGrp[j].append("text")
+               .text(ylab[j])
+               .attr("x", xpos[j])
+               .attr("y", (top[j]+bottom[j])/2)
+               .attr("transform", "rotate(270,#{xpos[j]},#{(top[j]+bottom[j])/2})")
+               .attr("fill", "blue")
 
-  botLYaxisGrp.selectAll("empty")
-    .data(yScale.ticks(10))
-    .enter()
-    .append("line")
-    .attr("y1", (d) -> yScale(d))
-    .attr("y2", (d) -> yScale(d))
-    .attr("x1", pad.left)
-    .attr("x2", pad.left+botLwInner)
-    .attr("stroke", "white")
-    .attr("fill", "none")
-    .attr("stroke-width", "1")
-  botLYaxisGrp.selectAll("empty")
-    .data(yScale.ticks(6))
-    .enter()
-    .append("text")
-    .text((d) -> d)
-    .attr("x", pad.left*0.8)
-    .attr("y", (d) -> yScale(d))
-
-  botMYaxisGrp.selectAll("empty")
-    .data(botMyScale.ticks(6))
-    .enter()
-    .append("line")
-    .attr("y1", (d) -> botMyScale(d))
-    .attr("y2", (d) -> botMyScale(d))
-    .attr("x1", botLw + pad.left)
-    .attr("x2", botLw + pad.left + botRwInner)
-    .attr("stroke", "white")
-    .attr("fill", "none")
-    .attr("stroke-width", "1")
-  botMYaxisGrp.selectAll("empty")
-    .data(botMyScale.ticks(6))
-    .enter()
-    .append("text")
-    .text((d) -> d)
-    .attr("x", botLw + pad.left*0.8)
-    .attr("y", (d) -> botMyScale(d))
-
-  botRYaxisGrp.selectAll("empty")
-    .data(botRyScale.ticks(6))
-    .enter()
-    .append("line")
-    .attr("y1", (d) -> botRyScale(d))
-    .attr("y2", (d) -> botRyScale(d))
-    .attr("x1", botLeft[2])
-    .attr("x2", botRight[2])
-    .attr("stroke", "white")
-    .attr("fill", "none")
-    .attr("stroke-width", "1")
-  botRYaxisGrp.selectAll("empty")
-    .data(botRyScale.ticks(6))
-    .enter()
-    .append("text")
-    .attr("class", "alignright")
-    .text((d) -> d)
-    .attr("x", botLeft[2] - pad.left*0.08)
-    .attr("y", (d) -> botRyScale(d))
-    .attr("text-anchor", "end")
-
-  # y-axis labels
-  topYaxisGrp.append("text")
-    .text("LOD score")
-    .attr("x", pad.left/2)
-    .attr("y", pad.top + hInner/2)
-    .attr("transform", "rotate(270,#{pad.left/2},#{pad.top+hInner/2})")
-    .attr("fill", "blue")
-  botLYaxisGrp.append("text")
-    .text("LOD score")
-    .attr("x", pad.left/2)
-    .attr("y", pad.top + hInner/2)
-    .attr("transform", "rotate(270,#{pad.left/2},#{pad.top+hInner/2})")
-    .attr("fill", "blue")
-
-  botMYaxisGrp.append("text")
-    .text(data.phenotype)
-    .attr("x", botLw + pad.left*0.4)
-    .attr("y", pad.top + hInner/2)
-    .attr("transform", "rotate(270,#{botLw+pad.left*0.4},#{pad.top+hInner/2})")
-    .attr("fill", "blue")
+  # title on top panel
   topsvg.append("text")
      .text(data.phenotype)
-     .attr("x", pad.left + wInner/2)
+     .attr("x", (left[0] + right[0])/2)
      .attr("y", pad.top/2)
      .attr("fill", "blue")
-  botRYaxisGrp.append("text")
-    .text(data.phenotype)
-    .attr("x", botLeft[2] - pad.left*0.7)
-    .attr("y", pad.top + hInner/2)
-    .attr("transform", "rotate(270,#{botLeft[2]-pad.left*0.7},#{pad.top+hInner/2})")
-    .attr("fill", "blue")
-
 
   # x-axis labels
-  topXaxisGrp.append("text")
-    .text("Chromosome")
-    .attr("x", pad.left + wInner/2)
-    .attr("y", pad.top + hInner + pad.bottom*0.65)
-    .attr("fill", "blue")
-
-  topsvg.append("text")
-     .text(data.phenotype)
-     .attr("x", pad.left + wInner/2)
-     .attr("y", pad.top/2)
-     .attr("fill", "blue")
-
-  botLXaxisGrp.append("text")
-    .text("Position (cM)")
-    .attr("x", pad.left + botLwInner/2)
-    .attr("y", pad.top + hInner + pad.bottom*0.65)
-    .attr("fill", "blue")
+  xlab = ["Chromosome", "Position (cM)"]
+  for j in [0..1]
+    XaxisGrp[j].append("text")
+               .text(xlab[j])
+               .attr("x", (left[j] + right[j])/2)
+               .attr("y", bottom[j] + pad.bottom*0.65)
+               .attr("fill", "blue")
 
   # lod curves by chr
   lodcurve = (j) ->
       d3.svg.line()
-        .x((d) -> xScale[j](d))
-        .y((d,i) -> yScale(data.lod[j].lod[i]))
+        .x((d) -> xScale[0][j](d))
+        .y((d,i) -> yScale[0](data.lod[j].lod[i]))
 
   curves = topsvg.append("g")
 
@@ -437,8 +326,8 @@ draw = (data) ->
   # detailed LOD curves below
   botlodcurve = (j) ->
       d3.svg.line()
-          .x((d) -> botLxScale[j](d))
-          .y((d,i) -> yScale(data.lod[j].lod[i]))
+          .x((d) -> xScale[1][j](d))
+          .y((d,i) -> yScale[1](data.lod[j].lod[i]))
 
   randomChr = data.chr[Math.floor(Math.random()*data.chr.length)]
 
@@ -448,43 +337,39 @@ draw = (data) ->
        .attr("id", "detailedLod")
        .attr("stroke", "blue")
        .style("pointer-events", "none")
-
   botsvg.append("text")
-        .attr("x", pad.left + botLwInner/2)
+        .attr("x", (left[1] + right[1])/2)
         .attr("y", pad.top/2)
         .text("Chromosome #{randomChr}")
         .attr("id", "botLtitle")
         .attr("fill", "blue")
-
   botsvg.append("text")
-        .attr("x", botLw + pad.left + botRwInner/2)
+        .attr("x", (left[2]+right[2])/2)
         .attr("y", pad.top/2)
         .text("")
         .attr("id", "botRtitle")
         .attr("fill", "blue")
 
-  botLXaxisGrp.selectAll("empty")
-              .data(botLxScale[randomChr].ticks(10))
+  XaxisGrp[1].selectAll("empty")
+              .data(xScale[1][randomChr].ticks(10))
               .enter()
               .append("line")
-              .attr("class", "botLXaxis")
-              .attr("y1", pad.top)
-              .attr("y2", pad.top+hInner)
-              .attr("x1", (td) -> botLxScale[randomChr](td))
-              .attr("x2", (td) -> botLxScale[randomChr](td))
+              .attr("class", "axis")
+              .attr("y1", top[1])
+              .attr("y2", bottom[1])
+              .attr("x1", (td) -> xScale[1][randomChr](td))
+              .attr("x2", (td) -> xScale[1][randomChr](td))
               .attr("stroke", darkGray)
               .attr("fill", "none")
               .attr("stroke-width", "1")
-
-  botLXaxisGrp.selectAll("empty")
-              .data(botLxScale[randomChr].ticks(10))
+  XaxisGrp[1].selectAll("empty")
+              .data(xScale[1][randomChr].ticks(10))
               .enter()
               .append("text")
-              .attr("class", "botLXaxis")
+              .attr("class", "axis")
               .text((td) -> td)
-              .attr("y", pad.top + hInner + pad.bottom*0.25)
-              .attr("x", (td) -> botLxScale[randomChr](td))
-
+              .attr("y", bottom[1] + pad.bottom*0.25)
+              .attr("x", (td) -> xScale[1][randomChr](td))
 
   onedig = d3.format(".1f")
 
@@ -500,8 +385,8 @@ draw = (data) ->
           .append("circle")
           .attr("class", "markercircle")
           .attr("id", (td) -> "circle#{td}")
-          .attr("cx", (td) -> botLxScale[chr](data.lod[chr].pos[data.markerindex[chr][td]]))
-          .attr("cy", (td) -> yScale(data.lod[chr].lod[data.markerindex[chr][td]]))
+          .attr("cx", (td) -> xScale[1][chr](data.lod[chr].pos[data.markerindex[chr][td]]))
+          .attr("cy", (td) -> yScale[1](data.lod[chr].lod[data.markerindex[chr][td]]))
           .attr("r", 6)
           .attr("fill", purple)
           .attr("stroke", "none")
@@ -537,27 +422,30 @@ draw = (data) ->
                botsvg.selectAll("circle.markercircle").remove()
                dotsAtMarkers(d)
                d3.select("text#botLtitle").text("Chromosome #{d}")
-               botLXaxisGrp.selectAll(".botLXaxis").remove()
-               botLXaxisGrp.selectAll("empty")
-                           .data(botLxScale[d].ticks(10))
+
+               XaxisGrp[1].selectAll("line.axis").remove()
+               XaxisGrp[1].selectAll("text.axis").remove()
+
+               XaxisGrp[1].selectAll("empty")
+                           .data(xScale[1][d].ticks(10))
                            .enter()
                            .append("line")
-                           .attr("class", "botLXaxis")
-                           .attr("y1", pad.top)
-                           .attr("y2", pad.top+hInner)
-                           .attr("x1", (td) -> botLxScale[d](td))
-                           .attr("x2", (td) -> botLxScale[d](td))
+                           .attr("class", "axis")
+                           .attr("y1", top[1])
+                           .attr("y2", bottom[1])
+                           .attr("x1", (td) -> xScale[1][d](td))
+                           .attr("x2", (td) -> xScale[1][d](td))
                            .attr("stroke", darkGray)
                            .attr("fill", "none")
                            .attr("stroke-width", "1")
-               botLXaxisGrp.selectAll("empty")
-                           .data(botLxScale[d].ticks(10))
+               XaxisGrp[1].selectAll("empty")
+                           .data(xScale[1][d].ticks(10))
                            .enter()
                            .append("text")
-                           .attr("class", "botLXaxis")
+                           .attr("class", "axis")
                            .text((td) -> td)
-                           .attr("y", pad.top + hInner + pad.bottom*0.25)
-                           .attr("x", (td) -> botLxScale[d](td))
+                           .attr("y", bottom[1] + pad.bottom*0.25)
+                           .attr("x", (td) -> xScale[1][d](td))
 
   # chr labels
   topsvg.append("g").selectAll("empty")
@@ -566,38 +454,16 @@ draw = (data) ->
     .append("text")
     .text((d) -> d)
     .attr("x", (d) -> Math.floor((chrPixelStart[d] + chrPixelEnd[d])/2))
-    .attr("y", pad.top + hInner + pad.bottom*0.3)
+    .attr("y", bottom[0] + pad.bottom*0.3)
 
   # black borders
-  topsvg.append("rect")
-     .attr("x", pad.left)
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", wInner)
-     .attr("class", "outerBox")
-     .style("pointer-events", "none")
-  botsvg.append("rect")
-     .attr("x", pad.left)
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", botLwInner)
-     .attr("class", "outerBox")
-     .style("pointer-events", "none")
-  botsvg.append("rect")
-     .attr("x", botLeft[1])
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", botRwInner)
-     .attr("class", "outerBox")
-     .style("pointer-events", "none")
-  botsvg.append("rect")
-     .attr("x", botLeft[2])
-     .attr("y", pad.top)
-     .attr("height", hInner)
-     .attr("width", botRwInner)
-     .attr("class", "outerBox")
-     .style("pointer-events", "none")
-
+  for j in [0..3]
+    svgs[j].append("rect")
+           .attr("x", left[j])
+           .attr("y", top[j])
+           .attr("height", hInner[j])
+           .attr("width", wInner[j])
+           .attr("class", "outerBox")
 
 # load json file and call draw function
 d3.json("insulinlod.json", draw)
