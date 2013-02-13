@@ -1,11 +1,17 @@
 # function that does all of the work
 draw = (data) ->
 
+  # take log of phenotype
+  log = (x) -> Math.log(x)/Math.LN10
+  for i of data.phevals
+    data.phevals[i] = log data.phevals[i]
+  data.phenotype = "log10 #{data.phenotype}"
+
   # dimensions of SVG
   w = 1350
   h = 450
   botLw = 650
-  pad = {left:60, top:20, right:40, bottom: 40}
+  pad = {left:60, top:40, right:40, bottom: 40}
   innerPad = 4
   wInner = []
   wInner[0] = w - pad.left - pad.right
@@ -30,6 +36,12 @@ draw = (data) ->
   for i in [0..3]
     top[i] = pad.top
     bottom[i] = pad.top + hInner[i]
+
+  # jitter amounts for PXG plot
+  jitterAmount = (right[3] - left[3])/50
+  jitter = []
+  for i of data.phevals
+    jitter[i] = (2.0*Math.random()-1.0) * jitterAmount
 
   # colors definitions
   lightGray = d3.rgb(230, 230, 230)
@@ -232,6 +244,7 @@ draw = (data) ->
          .attr("stroke", "black")
          .attr("stroke-width", "2")
 
+ 
   # background rectangles for each chromosome, alternate color
   chrRect = topsvg.append("g").selectAll("empty")
      .data(data.chr)
@@ -254,7 +267,6 @@ draw = (data) ->
 
   nTicks = [10, 10, 6, 6]
   nLabels = [6, 6, 6, 6]
-  padMult = [0.15, 0.15, 0.25, 0.05]
   for j in [0..3]
     YaxisGrp[j].selectAll("empty")
                .data(yScale[j].ticks(nTicks[j]))
@@ -272,13 +284,9 @@ draw = (data) ->
                .enter()
                .append("text")
                .text((d) -> d)
-               .attr("x", left[j] - pad.left*padMult[j])
+               .attr("x", left[j] - pad.left*0.05)
                .attr("y", (d) -> yScale[j](d))
-               .attr("class",
-                   if j == 3
-                      "alignright"
-                   else
-                      "axis")
+               .attr("class", "alignright")
 
   # y-axis titles
   ylab = ["LOD score", "LOD score", data.phenotype, data.phenotype]
@@ -329,7 +337,61 @@ draw = (data) ->
           .x((d) -> xScale[1][j](d))
           .y((d,i) -> yScale[1](data.lod[j].lod[i]))
 
-  randomChr = data.chr[Math.floor(Math.random()*data.chr.length)]
+  randomDraw = (x) -> x[Math.floor(Math.random()*x.length)]
+
+  randomChr = randomDraw(data.chr)
+  randomMarker = randomDraw(data.markers[randomChr])
+
+  # initial phenotype vs genotype plot
+  initialPXG = (chr, marker) ->
+    botsvg.selectAll("empty")
+          .data(data.phevals)
+          .enter()
+          .append("circle")
+          .attr("class", "plotPXG")
+          .attr("cx", (d,i) ->
+              g = Math.abs(data.geno[marker][i])
+              sx = data.sex[i]
+              if(chr=="X")
+                return xScale[3](sx*2+g-1)+jitter[i]
+              xScale[3](sx*3+g-1)+jitter[i])
+          .attr("cy", (d) -> yScale[3](d))
+          .attr("r", "3")
+          .attr("fill", (d,i) ->
+              g = data.geno[marker][i]
+              return pink if g < 0
+              darkGray)
+           .attr("stroke", (d,i) ->
+               g = data.geno[marker][i]
+               return purple if g < 0
+               "black")
+          .attr("stroke-width", (d,i) ->
+               g = data.geno[marker][i]
+               return "2" if g < 0
+               "1")
+
+  # function to revise phenotype vs genotype plot
+  revPXG = (chr, marker) ->
+    botsvg.selectAll(".plotPXG")
+           .transition().duration(1000)
+           .attr("cx", (d,i) ->
+               g = Math.abs(data.geno[marker][i])
+               sx = data.sex[i]
+               if(chr=="X")
+                 return xScale[3](sx*2+g-1)+jitter[i]
+               xScale[3](sx*3+g-1)+jitter[i])
+           .attr("fill", (d,i) ->
+               g = data.geno[marker][i]
+               return pink if g < 0
+               darkGray)
+           .attr("stroke", (d,i) ->
+               g = data.geno[marker][i]
+               return purple if g < 0
+               "black")
+           .attr("stroke-width", (d,i) ->
+               g = data.geno[marker][i]
+               return "2" if g < 0
+               "1")
 
   botsvg.append("g").append("path")
        .attr("d", botlodcurve(randomChr)(data.lod[randomChr].pos))
@@ -344,7 +406,7 @@ draw = (data) ->
         .attr("id", "botLtitle")
         .attr("fill", "blue")
   botsvg.append("text")
-        .attr("x", (left[2]+right[2])/2)
+        .attr("x", (left[2]+right[3])/2)
         .attr("y", pad.top/2)
         .text("")
         .attr("id", "botRtitle")
@@ -406,12 +468,28 @@ draw = (data) ->
                  markerClick[td] = 1
                  d3.select(this).attr("opacity", 1).attr("fill",pink).attr("stroke",purple)
                  effectPlot chr, td
+                 revPXG chr, td
+                 unless randomMarker is ""
+                   d3.select("#circle#{randomMarker}")
+                     .attr("opacity", 0)
+                     .attr("fill",purple)
+                     .attr("stroke","none")
+                   randomMarker = ""
 
   dotsAtMarkers(randomChr)
+
+  # Initial "click" of the random marker
+  pos = data.lod[randomChr].pos[data.markerindex[randomChr][randomMarker]]
+  title = "#{randomMarker} (chr #{randomChr}, #{onedig(pos)} cM)"
+  d3.select("text#botRtitle").text(title)
+  d3.select("#circle#{randomMarker}").attr("opacity", 1).attr("fill",pink).attr("stroke",purple)
+  effectPlot randomChr, randomMarker
+  initialPXG randomChr, randomMarker
 
   # select chromosome for lower LOD detailed curve
   lastChr = randomChr
   topsvg.select("#rect#{randomChr}").attr("fill", pink)
+
   chrRect.on "click", (d) ->
              d3.select(this).attr("fill", pink)
              if lastChr != d
