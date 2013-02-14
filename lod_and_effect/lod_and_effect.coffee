@@ -181,7 +181,7 @@ draw = (data) ->
          femaleloc2.push(xScale[2](i))
          femaleloc3.push(xScale[3](i))
      aves = [[average(femaleloc2), average(maleloc2)], [average(femaleloc3), average(maleloc3)]]
-     
+
      # lower middle and lower right X axes
      for j in [2..3]
        XaxisGrp[j].selectAll("line").remove()
@@ -241,7 +241,7 @@ draw = (data) ->
          .attr("stroke", "black")
          .attr("stroke-width", "2")
 
- 
+
   # background rectangles for each chromosome, alternate color
   chrRect = topsvg.append("g").selectAll("empty")
      .data(data.chr)
@@ -556,7 +556,7 @@ draw = (data) ->
                           .attr("y2", bottom[1] - tickHeight)
                           .attr("stroke", "black")
                           .attr("stroke-width", "1")
-                          
+
 
   # chr labels
   topsvg.append("g").selectAll("empty")
