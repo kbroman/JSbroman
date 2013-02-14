@@ -31,6 +31,9 @@ draw = (data) ->
     top[i] = pad.top
     bottom[i] = pad.top + hInner[i]
 
+  # height of marker ticks in lower-left panel
+  tickHeight = (bottom[1] - top[1])*0.02
+
   # jitter amounts for PXG plot
   jitterAmount = (right[3] - left[3])/50
   jitter = []
@@ -258,6 +261,7 @@ draw = (data) ->
   for j in [0..3]
     XaxisGrp[j] = svgs[j].append("g").attr("id", "Xaxis#{j}").attr("class", "axis")
     YaxisGrp[j] = svgs[j].append("g").attr("id", "Yaxis#{j}").attr("class", "axis")
+  markerTicks = svgs[1].append("g").attr("id", "markerTickGrp")
 
   nTicks = [10, 10, 6, 6]
   nLabels = [6, 6, 6, 6]
@@ -473,6 +477,21 @@ draw = (data) ->
                    randomMarker = ""
 
   dotsAtMarkers(randomChr)
+  markerTicks.selectAll("empty")
+             .data(data.markers[randomChr])
+             .enter()
+             .append("line")
+             .attr("class", "markertick")
+             .attr("x1", (td) ->
+                            index = data.markerindex[randomChr][td]
+                            xScale[1][randomChr](data.lod[randomChr].pos[index]))
+             .attr("x2", (td) ->
+                            index = data.markerindex[randomChr][td]
+                            xScale[1][randomChr](data.lod[randomChr].pos[index]))
+             .attr("y1", bottom[1])
+             .attr("y2", bottom[1] - tickHeight)
+             .attr("stroke", "black")
+             .attr("stroke-width", "1")
 
   # Initial "click" of the random marker
   pos = data.lod[randomChr].pos[data.markerindex[randomChr][randomMarker]]
@@ -520,6 +539,24 @@ draw = (data) ->
                            .text((td) -> td)
                            .attr("y", bottom[1] + pad.bottom*0.25)
                            .attr("x", (td) -> xScale[1][d](td))
+
+               markerTicks.selectAll(".markertick").remove()
+               markerTicks.selectAll("empty")
+                          .data(data.markers[d])
+                          .enter()
+                          .append("line")
+                          .attr("class", "markertick")
+                          .attr("x1", (td) ->
+                                         index = data.markerindex[d][td]
+                                         xScale[1][d](data.lod[d].pos[index]))
+                          .attr("x2", (td) ->
+                                         index = data.markerindex[d][td]
+                                         xScale[1][d](data.lod[d].pos[index]))
+                          .attr("y1", bottom[1])
+                          .attr("y2", bottom[1] - tickHeight)
+                          .attr("stroke", "black")
+                          .attr("stroke-width", "1")
+                          
 
   # chr labels
   topsvg.append("g").selectAll("empty")
