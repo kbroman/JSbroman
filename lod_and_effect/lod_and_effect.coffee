@@ -1,12 +1,6 @@
 # function that does all of the work
 draw = (data) ->
 
-  # take log of phenotype
-  log = (x) -> Math.log(x)/Math.LN10
-  for i of data.phevals
-    data.phevals[i] = log data.phevals[i]
-  data.phenotype = "log10 #{data.phenotype}"
-
   # dimensions of SVG
   w = 1350
   h = 450
@@ -114,7 +108,7 @@ draw = (data) ->
   xScale = []
   yScale = []
   yScale[0] = d3.scale.linear()
-                .domain([0, maxLod*1.02])
+                .domain([-0.1, maxLod*1.02])
                 .range([bottom[0], top[0]])
   yScale[1] = yScale[0]
 
@@ -283,7 +277,9 @@ draw = (data) ->
                .data(yScale[j].ticks(nLabels[j]))
                .enter()
                .append("text")
-               .text((d) -> d)
+               .text((d) ->
+                  return d if j <= 1
+                  d3.format(".1f")(d))
                .attr("x", left[j] - pad.left*0.05)
                .attr("y", (d) -> yScale[j](d))
                .attr("class", "alignright")

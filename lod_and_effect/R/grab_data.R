@@ -4,14 +4,14 @@
 attach("~/Projects/Attie/GoldStandard/FinalData/aligned_geno_with_pmap.RData")
 attach("~/Projects/Attie/GoldStandard/FinalData/lipomics_final_rev2.RData")
 
-phenotype <- "Insulin (ng/ml) 10 wk"
+phenotype <- "log10 Insulin (ng/ml) 10 wk"
 
 library(lineup)
 id <- findCommonID(f2g$pheno$MouseNum, lipomics$MouseNum)
 f2g <- f2g[,id$first]
 lipomics <- lipomics[id$second,]
 f2g <- calc.genoprob(f2g, step=0.5, stepwidth="max", error.prob=0.002, map.function="c-f")
-f2g$pheno$insulin <- rowMeans(lipomics[,c(37,41)], na.rm=TRUE)
+f2g$pheno$insulin <- log10(rowMeans(lipomics[,c(37,41)], na.rm=TRUE))
 
 # genome scan with sex as interactive covariate
 sex <- as.numeric(f2g$pheno$Sex)-1
@@ -20,12 +20,10 @@ out <- scanone(f2g, phe="insulin", addcovar=sex, intcovar=sex, method="hk")
 f2g <- sim.geno(f2g, step=0, error.prob=0.002, map.function="c-f", n.draws=128)
 mar <- markernames(f2g)
 
-qtleffects <- vector("list", length(mar))
-names(qtleffects) <- mar
-for(i in seq(along=mar)) {
-  if(i==round(i, -1)) cat(i,"\n")
-  qtleffects[[i]] <- effectplot(f2g, phe="insulin", mname1="Sex", mname2=mar[i], draw=FALSE)
-}
+library(parallel)
+ncores <- detectCores()
+qtleffects <- mclapply(mar, function(a) effectplot(f2g, phe="insulin", mname1="Sex",
+                                                   mname2=a, draw=FALSE), mc.cores=ncores)
 
 for(i in seq(along=qtleffects)) {
   qtleffects[[i]]$Means <- lapply(as.list(as.data.frame(qtleffects[[i]]$Means)), function(a) {names(a) <- c("Female", "Male"); a})
