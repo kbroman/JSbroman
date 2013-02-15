@@ -21,7 +21,7 @@ ord <- rev(order(quant[5,])) # ordered array indices, by array medians
 #boxplot(hypo.mlratio[,ord[seq(1, length(ord), by=5)]], outline=FALSE, las=2)
 
 # counts for histograms
-br <- seq(-2, 2, len=201)
+br <- seq(-2, 2, len=401)
 counts <- apply(hypo.mlratio, 2, function(a) hist(a, breaks=br, plot=FALSE)$counts)
 
 mice <- colnames(hypo.mlratio)
