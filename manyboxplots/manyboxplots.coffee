@@ -135,7 +135,7 @@ draw = (data) ->
   index = {}
   specialrects = svg.append("g")
   for d,i in data.ind
-    clickStatus[d] = 0;
+    clickStatus[d] = 0
     specialrects.append("rect")
        .attr("x", xScale(i-0.5))
        .attr("y", yScale(data.quant[nQuant-1][d]))
@@ -207,7 +207,7 @@ draw = (data) ->
              .domain([-1.25, -low])
              .range([pad.left, w-pad.right])
 
-  maxCount = 0;
+  maxCount = 0
   for i of data.counts
     for j of data.counts[i]
       maxCount = data.counts[i][j] if data.counts[i][j] > maxCount
@@ -287,7 +287,7 @@ draw = (data) ->
         .attr("fill", "blue")
 
   indRect
-    .on("mouseover", (d) ->
+    .on "mouseover", (d) ->
               d3.select(this)
                  .attr("opacity", "1")
               d3.select("#histline")
@@ -296,11 +296,19 @@ draw = (data) ->
               d3.select("#histtitle")
                  .datum(d)
                  .text((d) -> d)
-            )
-    .on("mouseout", (d) ->
+              lowsvg.append("text")
+                .text(d)
+                .attr("x", lowxScale(1.55))
+                .attr("y", pad.top*2)
+                .attr("id", "text#{d}")
+                .attr("fill", "purple")
+
+    .on "mouseout", (d) ->
               d3.select(this).attr("opacity", "0")
-            )
-    .on("click", (d) ->
+              d3.select("#text#{d}").remove()
+
+    .on "click", (d) ->
+              console.log(d)
               clickStatus[d] = 1 - clickStatus[d]
               svg.select("rect##{d}").attr("opacity", clickStatus[d])
               if clickStatus[d]
@@ -319,7 +327,6 @@ draw = (data) ->
                       .attr("stroke-width", "2")
               else
                 grp4BkgdHist.select("path##{d}").remove()
-            )
 
   # white box above to smother overlap
   lowsvg.append("rect")
