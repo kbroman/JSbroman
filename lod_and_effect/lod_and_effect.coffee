@@ -212,7 +212,7 @@ draw = (data) ->
                   .attr("y", bottom[j] + pad.bottom*0.75)
                   .attr("x", (td) -> td)
 
-     effplot = botsvg.append("g")
+     effplot = botsvg.append("g").attr("id", "effplot")
 
      effplot.selectAll("empty")
          .data(mean)
@@ -243,7 +243,7 @@ draw = (data) ->
 
 
   # background rectangles for each chromosome, alternate color
-  chrRect = topsvg.append("g").selectAll("empty")
+  chrRect = topsvg.append("g").attr("id", "chrRect").selectAll("empty")
      .data(data.chr)
      .enter()
      .append("rect")
@@ -321,7 +321,7 @@ draw = (data) ->
         .x((d) -> xScale[0][j](d))
         .y((d,i) -> yScale[0](data.lod[j].lod[i]))
 
-  curves = topsvg.append("g")
+  curves = topsvg.append("g").attr("id", "curves")
 
   for j in data.chr
     curves.append("path")
@@ -344,7 +344,7 @@ draw = (data) ->
 
   # initial phenotype vs genotype plot
   initialPXG = (chr, marker) ->
-    botsvg.selectAll("empty")
+    botsvg.append("g").attr("id", "plotPXG").selectAll("empty")
           .data(data.phevals)
           .enter()
           .append("circle")
@@ -393,7 +393,7 @@ draw = (data) ->
                return "2" if g < 0
                "1")
 
-  botsvg.append("g").append("path")
+  botsvg.append("g").attr("id", "path").append("path")
        .attr("d", botlodcurve(randomChr)(data.lod[randomChr].pos))
        .attr("class", "thickline")
        .attr("id", "detailedLod")
@@ -435,13 +435,27 @@ draw = (data) ->
 
   onedig = d3.format(".1f")
 
+
+  markerCircle = []
+
   # dots at markers
   dotsAtMarkers = (chr) ->
     markerClick = {}
     for m in data.markers[chr]
       markerClick[m] = 0
+    markerClick[randomMarker] = 1
     lastMarker = ""
-    markerCircle = botsvg.append("g").selectAll("empty")
+
+    # Using https://github.com/Caged/d3-tip
+    #   [slightly modified in https://github.com/kbroman/d3-tip]
+    tip = d3.svg.tip()
+          .orient("right")
+          .padding(3)
+          .text((z) -> z)
+          .attr("class", "d3-tip")
+          .attr("id", "d3tip")
+
+    markerCircle = botsvg.append("g").attr("id", "markerCircle").selectAll("empty")
           .data(data.markers[chr])
           .enter()
           .append("circle")
@@ -454,10 +468,12 @@ draw = (data) ->
           .attr("stroke", "none")
           .attr("stroke-width", "2")
           .attr("opacity", 0)
-          .on "mouseover", ->
-                 d3.select(this).attr("opacity", 1)
+          .on("mouseover", (td) ->
+                 d3.select(this).attr("opacity", 1) unless markerClick[td]
+                 tip.call(this,td))
           .on "mouseout", (td) ->
                  d3.select(this).attr("opacity", markerClick[td])
+                 d3.selectAll("#d3tip").remove()
           .on "click", (td) ->
                  pos = data.lod[chr].pos[data.markerindex[chr][td]]
                  title = "#{td} (chr #{chr}, #{onedig(pos)} cM)"
@@ -559,7 +575,7 @@ draw = (data) ->
 
 
   # chr labels
-  topsvg.append("g").selectAll("empty")
+  topsvg.append("g").attr("id", "chrLabels").selectAll("empty")
     .data(data.chr)
     .enter()
     .append("text")
