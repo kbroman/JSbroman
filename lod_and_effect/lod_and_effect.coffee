@@ -436,7 +436,16 @@ draw = (data) ->
   onedig = d3.format(".1f")
 
 
-  markerCircle = []
+  # Using https://github.com/Caged/d3-tip
+  #   [slightly modified in https://github.com/kbroman/d3-tip]
+  tip = d3.svg.tip()
+          .orient("right")
+          .padding(3)
+          .text((z) -> z)
+          .attr("class", "d3-tip")
+          .attr("id", "d3tip")
+
+  markerClick = []
 
   # dots at markers
   dotsAtMarkers = (chr) ->
@@ -445,15 +454,6 @@ draw = (data) ->
       markerClick[m] = 0
     markerClick[randomMarker] = 1
     lastMarker = ""
-
-    # Using https://github.com/Caged/d3-tip
-    #   [slightly modified in https://github.com/kbroman/d3-tip]
-    tip = d3.svg.tip()
-          .orient("right")
-          .padding(3)
-          .text((z) -> z)
-          .attr("class", "d3-tip")
-          .attr("id", "d3tip")
 
     markerCircle = botsvg.append("g").attr("id", "markerCircle").selectAll("empty")
           .data(data.markers[chr])
