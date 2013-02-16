@@ -286,6 +286,15 @@ draw = (data) ->
         .attr("dominant-baseline", "middle")
         .attr("fill", "blue")
 
+  # Using https://github.com/Caged/d3-tip
+  #   [slightly modified in https://github.com/kbroman/d3-tip]
+  tip = d3.svg.tip()
+          .orient("right")
+          .padding(3)
+          .text((z) -> z)
+          .attr("class", "d3-tip")
+          .attr("id", "d3tip")
+
   indRect
     .on "mouseover", (d) ->
               d3.select(this)
@@ -296,16 +305,11 @@ draw = (data) ->
               d3.select("#histtitle")
                  .datum(d)
                  .text((d) -> d)
-              lowsvg.append("text")
-                .text(d)
-                .attr("x", lowxScale(1.55))
-                .attr("y", pad.top*2)
-                .attr("id", "text#{d}")
-                .attr("fill", "purple")
+              tip.call(this,d)
 
     .on "mouseout", (d) ->
               d3.select(this).attr("opacity", "0")
-              d3.select("#text#{d}").remove()
+              d3.selectAll("#d3tip").remove()
 
     .on "click", (d) ->
               console.log(d)
