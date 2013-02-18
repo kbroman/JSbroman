@@ -240,6 +240,8 @@ draw = (data) ->
             "red")
          .attr("stroke", "black")
          .attr("stroke-width", "2")
+         .on("mouseover", efftip)
+         .on("mouseout", -> d3.selectAll("#efftip").remove())
 
 
   # background rectangles for each chromosome, alternate color
@@ -369,6 +371,9 @@ draw = (data) ->
                g = data.geno[marker][i]
                return "2" if g < 0
                "1")
+          .on("mouseover", indtip)
+          .on("mouseout", -> d3.selectAll("#indtip").remove())
+
 
   # function to revise phenotype vs genotype plot
   revPXG = (chr, marker) ->
@@ -438,12 +443,24 @@ draw = (data) ->
 
   # Using https://github.com/Caged/d3-tip
   #   [slightly modified in https://github.com/kbroman/d3-tip]
-  tip = d3.svg.tip()
-          .orient("right")
-          .padding(3)
-          .text((z) -> z)
-          .attr("class", "d3-tip")
-          .attr("id", "d3tip")
+  martip = d3.svg.tip()
+             .orient("right")
+             .padding(3)
+             .text((z) -> z)
+             .attr("class", "d3-tip")
+             .attr("id", "martip")
+  indtip = d3.svg.tip()
+             .orient("right")
+             .padding(3)
+             .text((d,i) -> data.individuals[i])
+             .attr("class", "d3-tip")
+             .attr("id", "indtip")
+  efftip = d3.svg.tip()
+             .orient("right")
+             .padding(3)
+             .text((d) -> d3.format(".2f")(d))
+             .attr("class", "d3-tip")
+             .attr("id", "efftip")
 
   markerClick = []
 
@@ -470,10 +487,10 @@ draw = (data) ->
           .attr("opacity", 0)
           .on("mouseover", (td) ->
                  d3.select(this).attr("opacity", 1) unless markerClick[td]
-                 tip.call(this,td))
+                 martip.call(this,td))
           .on "mouseout", (td) ->
                  d3.select(this).attr("opacity", markerClick[td])
-                 d3.selectAll("#d3tip").remove()
+                 d3.selectAll("#martip").remove()
           .on "click", (td) ->
                  pos = data.lod[chr].pos[data.markerindex[chr][td]]
                  title = "#{td} (chr #{chr}, #{onedig(pos)} cM)"
