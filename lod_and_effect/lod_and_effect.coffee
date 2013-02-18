@@ -371,9 +371,12 @@ draw = (data) ->
                g = data.geno[marker][i]
                return "2" if g < 0
                "1")
-          .on("mouseover", indtip)
-          .on("mouseout", -> d3.selectAll("#indtip").remove())
-
+          .on "mouseover", (d,i) ->
+               d3.select(this).attr("r", "5")
+               indtip.call(this, d, i)
+          .on "mouseout", ->
+               d3.selectAll("#indtip").remove()
+               d3.select(this).attr("r", "3")
 
   # function to revise phenotype vs genotype plot
   revPXG = (chr, marker) ->
