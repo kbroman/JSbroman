@@ -177,3 +177,16 @@ rect =
 {x, y} = rect
 console.log "x = #{x}"
 console.log "y = #{y}"
+
+####################
+### hashes, sorting
+####################
+console.log '\n## hashes ##'
+counts =
+  1: 2, 2: 6, 3: 8, 4: 2, 8: 1, 9: 6, 10: 4, 11: 6, 12: 4
+  5: 4, 6: 12, 7: 2, 13: 3, 14: 2, 15: 9, 20: 1, 21: 1, 22: 4
+  16: 2, 17: 1
+keys = (key for key of counts) # grab keys
+console.log(keys.join("|"))
+console.log(keys.sort().join("|"))             # sort lexicographically
+console.log(keys.sort((a,b) -> a-b).join("|")) # sort numerically
