@@ -2,9 +2,9 @@
 draw = (data) ->
 
   # dimensions of SVG
-  w = 1350
+  w = 1200
   h = 450
-  botLw = 650
+  botLw = 600
   pad = {left:60, top:40, right:40, bottom: 40}
   innerPad = 4
   wInner = []
