@@ -48,6 +48,7 @@ f2gi <- pull.geno(fill.geno(f2g, err=0.002, map.function="c-f"))
 g <- pull.geno(f2g)
 f2gi[is.na(g) | f2gi != g] <- -f2gi[is.na(g) | f2gi != g]
 f2gi <- as.list(as.data.frame(f2gi))
+individuals <- as.character(f2g$pheno$MouseNum)
 
 # write data to JSON file
 library(RJSONIO)
@@ -62,5 +63,6 @@ cat0a("\"markers\" :\n", toJSON(markers), ",\n\n")
 cat0a("\"effects\" :\n", toJSON(qtleffects, digits=8), ",\n\n")
 cat0a("\"phevals\" :\n", toJSON(phevals, digits=8), ",\n\n")
 cat0a("\"sex\" :\n", toJSON(sex), ",\n\n")
-cat0a("\"geno\" :\n", toJSON(f2gi), "\n\n")
+cat0a("\"geno\" :\n", toJSON(f2gi), ",\n\n")
+cat0a("\"individuals\" :\n", toJSON(individuals), "\n\n")
 cat0a("}\n")
