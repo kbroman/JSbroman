@@ -34,7 +34,7 @@ cat0a <- function(file, ...) cat(..., sep="", file=file, append=TRUE)
 
 # write LOD curves and phenotypes to files
 library(parallel)
-mclapply(1:ncol(islet.mlratio),
+junk <- mclapply(1:ncol(islet.mlratio),
          function(i) {
             probe <- colnames(islet.mlratio)[i]
             file <- paste0("../data/probe_data/probe", probe, ".json")
