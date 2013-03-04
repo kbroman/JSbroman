@@ -49,8 +49,7 @@ names(annot)[3] <- "pos.Mbp"
 
 # load phenotype data and scanone results
 # create one JSON file for each probe with a peak
-load("islet_mlratio_final.RData")
-islet.mlratio <- islet.mlratio[,haspeak]
+attach("islet_mlratio_final.RData")
 
 
 # line up phenotypes and genotypes
@@ -67,6 +66,10 @@ chr <- vector("list", nrow(tmp))
 for(i in seq(along=chr))
     chr[[i]] <- as.list(tmp[i,])
 names(chr) <- names(gmap)
+
+# simple scan to grab pseudo marker locations
+f2g <- calc.genoprob(f2g, step=0.5, stepwidth="max", err=0.002, map="c-f")
+pmark <- scanone(f2g, phe=1:nind(f2g), method="hk")[,1:2]
 
 class(pmark) <- "data.frame"
 tmp <- interpPositions(pmark, gmap, pmap)
