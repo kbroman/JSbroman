@@ -18,7 +18,7 @@ draw = (data) ->
   for i of left
     right[i] = left[i] + w[i]
     bottom[i] = top[i] + h[i]
-          
+
   totalw = right[2] + pad.right
   totalh = bottom[1] + pad.bottom
 
@@ -145,6 +145,10 @@ draw = (data) ->
                  .attr("id", "eqtltip")
 
 
+  # function for drawing lod curve for probe
+  draw_probe = (probe_data) ->
+    console.log("click! #{probe_data.probe}")
+
   # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
              .selectAll("empty")
@@ -170,6 +174,8 @@ draw = (data) ->
                                 .attr("stroke", "none")
                                 .attr("opacity", (d) -> Zscale(d.lod))
                  d3.selectAll("#eqtltip").remove()
+             .on "click", (d) ->
+                 d3.json("data/probe_data/probe#{d.probe}.json", draw_probe)
 
 
   # black borders
