@@ -1,4 +1,5 @@
 # grab data for interactive cistrans plot
+rm(list=ls())
 
 # annotation information
 attach("annot.amit_rev.RData")
@@ -41,17 +42,9 @@ names(annot)[3:4] <- c("pos_Mbp", "pos_cM")
 # http://www.ensembl.org/Mus_musculus/Search/Details?db=core;end=1;idx=Gene;species=Mus_musculus;q=Zswim7
 # http://www.informatics.jax.org/searchtool/Search.do?query=Zswim7
 
-tmp <- annot[,c("chr", "pos_Mb")]
-names(tmp)[2] <- "pos"
-tmp <- interpPositions(tmp, pmap, gmap)
-max(abs(tmp$newpos - annot$pos_cM))
-
-names(annot)[3] <- "pos_Mbp"
-
 # load phenotype data and scanone results
 # create one JSON file for each probe with a peak
 attach("islet_mlratio_final.RData")
-
 
 # line up phenotypes and genotypes
 library(lineup)
@@ -72,6 +65,8 @@ names(chr) <- names(gmap)
 f2g <- calc.genoprob(f2g, step=0.5, stepwidth="max", err=0.002, map="c-f")
 pmark <- scanone(f2g, phe=1:nind(f2g), method="hk")[,1:2]
 
+pmarknames <- split(rownames(pmark), pmark[,1])
+
 class(pmark) <- "data.frame"
 tmp <- interpPositions(pmark, gmap, pmap)
 names(tmp) <- c("chr", "pos_cM", "pos_Mbp")
@@ -79,6 +74,7 @@ pmark <- vector("list", nrow(tmp))
 names(pmark) <- rownames(tmp)
 for(i in seq(along=pmark))
     pmark[[i]] <- as.list(tmp[i,])
+
 
 tmp <- peaks
 names(tmp)[1] <- "probe"
@@ -112,7 +108,7 @@ cat0(file, "{\n")
 cat0a(file, "\"markers\" : \n", toJSON(markernames(f2g)), ",\n\n")
 cat0a(file, "\"chrnames\" : \n", toJSON(names(chr)), ",\n\n")
 cat0a(file, "\"chr\" : \n", toJSON(chr), ",\n\n")
-cat0a(file, "\"pmarknames\" : \n", toJSON(names(pmark)), ",\n\n")
+cat0a(file, "\"pmarknames\" : \n", toJSON(pmarknames), ",\n\n")
 cat0a(file, "\"pmark\" : \n", toJSON(pmark), ",\n\n")
 cat0a(file, "\"probes\" : \n", toJSON(probes), ",\n\n")
 cat0a(file, "\"peaks\" : \n", toJSON(peaks), ",\n\n")
@@ -120,3 +116,5 @@ cat0a(file, "\"sex\" :\n", toJSON(sex), ",\n\n")
 cat0a(file, "\"geno\" :\n", toJSON(f2gi), ",\n\n")
 cat0a(file, "\"individuals\" :\n", toJSON(individuals), "\n\n")
 cat0a(file, "}\n")
+
+for(i in 1:4) detach(2)
