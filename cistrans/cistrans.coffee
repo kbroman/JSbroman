@@ -129,6 +129,16 @@ draw = (data) ->
              .domain([0, 25])
              .range([0, 1])
 
+  # Using https://github.com/Caged/d3-tip
+  #   [slightly modified in https://github.com/kbroman/d3-tip]
+  eqtltip = d3.svg.tip()
+                 .orient("right")
+                 .padding(3)
+                 .text((z) -> "#{z.probe} (LOD = #{d3.format('.2f')(z.lod)})")
+                 .attr("class", "d3-tip")
+                 .attr("id", "eqtltip")
+
+
   # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
              .selectAll("empty")
@@ -147,11 +157,14 @@ draw = (data) ->
                                 .attr("stroke", "darkslateblue")
                                 .attr("stroke-width", 1)
                                 .attr("opacity", 1)
+                 eqtltip.call(this,d)
              .on "mouseout", (d) ->
                  d3.select(this).attr("r", peakRad)
                                 .attr("fill", "darkslateblue")
                                 .attr("stroke", "none")
                                 .attr("opacity", (d) -> Zscale(d.lod))
+                 d3.selectAll("#eqtltip").remove()
+
 
   # black borders
   for j of left
