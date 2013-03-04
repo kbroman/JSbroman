@@ -29,23 +29,24 @@ attach("aligned_geno_with_pmap.RData")
 gmap <- pull.map(f2g)
 
 # determine corresponding physical location
-peaks$pos.Mbp <- interpPositions(peaks[,c("chr", "pos")], gmap, pmap)$newpos
-names(peaks)[4] <- "pos.cM"
+peaks$pos_Mbp <- interpPositions(peaks[,c("chr", "pos")], gmap, pmap)$newpos
+names(peaks)[4] <- "pos_cM"
 
 # annotation information just for probes with LOD >= 5
 annot <- annot[!is.na(match(annot$a_gene_id, haspeak)),]
 annot <- annot[,c("a_gene_id", "chr", "pos.Mb", "pos.cM", "officialgenesymbol")]
+names(annot)[3:4] <- c("pos_Mbp", "pos_cM")
 
 # ensembl URL for a gene; same for MGI
 # http://www.ensembl.org/Mus_musculus/Search/Details?db=core;end=1;idx=Gene;species=Mus_musculus;q=Zswim7
 # http://www.informatics.jax.org/searchtool/Search.do?query=Zswim7
 
-tmp <- annot[,c("chr", "pos.Mb")]
+tmp <- annot[,c("chr", "pos_Mb")]
 names(tmp)[2] <- "pos"
 tmp <- interpPositions(tmp, pmap, gmap)
-max(abs(tmp$newpos - annot$pos.cM))
+max(abs(tmp$newpos - annot$pos_cM))
 
-names(annot)[3] <- "pos.Mbp"
+names(annot)[3] <- "pos_Mbp"
 
 # load phenotype data and scanone results
 # create one JSON file for each probe with a peak
@@ -73,7 +74,7 @@ pmark <- scanone(f2g, phe=1:nind(f2g), method="hk")[,1:2]
 
 class(pmark) <- "data.frame"
 tmp <- interpPositions(pmark, gmap, pmap)
-names(tmp) <- c("chr", "pos.cM", "pos.Mbp")
+names(tmp) <- c("chr", "pos_cM", "pos_Mbp")
 pmark <- vector("list", nrow(tmp))
 names(pmark) <- rownames(tmp)
 for(i in seq(along=pmark))
