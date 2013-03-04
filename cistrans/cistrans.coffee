@@ -26,7 +26,7 @@ draw = (data) ->
   peakRad = 2
   bigRad = 5
 
-  # height of marker ticks in lower-left panel
+  # height of marker ticks in lower panel
   tickHeight = (bottom[1] - top[1])*0.02
 
   # jitter amounts for PXG plot
@@ -108,11 +108,11 @@ draw = (data) ->
            .attr("fill", darkGray)
            .style("pointer-events", "none")
 
-  # same in lower-right
-  checkerboard = svg.append("g").attr("id", "checkerboard")
+  # same in lower panel
+  checkerboard2 = svg.append("g").attr("id", "checkerboard2")
   for ci,i in data.chrnames
       if(i % 2 == 0)
-        checkerboard.append("rect")
+        checkerboard2.append("rect")
            .attr("x", data.chr[ci].start_Xpixel)
            .attr("width", data.chr[ci].end_Xpixel - data.chr[ci].start_Xpixel)
            .attr("y", top[1])
@@ -123,6 +123,12 @@ draw = (data) ->
 
   # maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
+
+  console.log("before sorting: #{data.peaks[0].lod}")
+
+  # sort peaks to have increasing LOD score
+  data.peaks = data.peaks.sort (a,b) ->
+    return if a.lod < b.lod then -1 else +1
 
   # LOD score controls opacity
   Zscale = d3.scale.linear()
