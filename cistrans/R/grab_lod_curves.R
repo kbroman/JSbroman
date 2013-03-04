@@ -19,10 +19,10 @@ load("islet_mlratio_final.RData")
 islet.mlratio <- islet.mlratio[,haspeak]
 
 load("scanone.islet.RData")
-pmark <- scan.islet[,1:2]
 scan.islet <- scan.islet[,haspeak]
 
 # line up phenotypes and genotypes
+attach("aligned_geno_with_pmap.RData")
 library(lineup)
 id <- findCommonID(f2g$pheno$MouseNum, rownames(islet.mlratio))
 f2g <- f2g[,id$first]
@@ -33,15 +33,16 @@ cat0 <- function(file, ...) cat(..., sep="", file=file)
 cat0a <- function(file, ...) cat(..., sep="", file=file, append=TRUE)
 
 # write LOD curves and phenotypes to files
-for(i in 1:ncol(islet.mlratio)) {
-  if(i == round(i, -2)) cat(i, " of ", ncol(islet.mlratio), "\n")
-  probe <- colnames(islet.mlratio)[i]
-  file <- paste0("../data/probe_data/probe", probe, ".json")
-  cat0(file, "{\n")
-  cat0a(file, "\"probe\" : \"", probe, "\"\n\n")
-  cat0a(file, "\"pheno\" : \n")
-  cat0a(file, toJSON(as.numeric(islet.mlratio[,i]), digits=6), "\n\n")
-  cat0a(file, "\"lod\" : \n")
-  cat0a(file, toJSON(round(as.numeric(scan.islet[,probe]), 5), digits=8), "\n\n")
-  cat0a(file, "}\n")
-}
+library(parallel)
+mclapply(1:ncol(islet.mlratio),
+         function(i) {
+            probe <- colnames(islet.mlratio)[i]
+            file <- paste0("../data/probe_data/probe", probe, ".json")
+            cat0(file, "{\n")
+            cat0a(file, "\"probe\" : \"", probe, "\",\n\n")
+            cat0a(file, "\"pheno\" : \n")
+            cat0a(file, toJSON(as.numeric(islet.mlratio[,i]), digits=6), ",\n\n")
+            cat0a(file, "\"lod\" : \n")
+            cat0a(file, toJSON(round(as.numeric(scan.islet[,probe]), 5), digits=8), "\n\n")
+            cat0a(file, "}\n")
+         }, mc.cores=32)
