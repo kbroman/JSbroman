@@ -58,10 +58,10 @@ id <- findCommonID(f2g$pheno$MouseNum, rownames(islet.mlratio))
 f2g <- f2g[,id$first]
 islet.mlratio <- islet.mlratio[id$second,]
 
-tmp <- data.frame(start.cM = sapply(gmap, min),
-                  end.cM = sapply(gmap, max),
-                  start.Mbp = sapply(pmap, min),
-                  end.Mbp = sapply(pmap, max))
+tmp <- data.frame(start_cM = sapply(gmap, min),
+                  end_cM = sapply(gmap, max),
+                  start_Mbp = sapply(pmap, min),
+                  end_Mbp = sapply(pmap, max))
 chr <- vector("list", nrow(tmp))
 for(i in seq(along=chr))
     chr[[i]] <- as.list(tmp[i,])
