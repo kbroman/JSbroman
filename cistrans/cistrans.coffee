@@ -4,9 +4,9 @@ draw = (data) ->
   # dimensions of panels
   w = [800, 300]
   h = [w[0], 300]
-  w = [w[0], w[0], w[1]]
-  h = [h[0], h[1], h[0]]
   pad = {left:60, top:40, right:40, bottom: 40}
+  w = [w[0], w[0] + w[1] + pad.left + pad.right, w[1]]
+  h = [h[0], h[1], h[0]]
 
   left = [pad.left, pad.left,
           pad.left + w[0] + pad.right + pad.left]
@@ -25,6 +25,9 @@ draw = (data) ->
   # Size of rectangles in top-left panel
   peakRad = 2
   bigRad = 5
+
+  # gap between chromosomes in lower plot
+  chrGap = 8
 
   # height of marker ticks in lower panel
   tickHeight = (bottom[1] - top[1])*0.02
@@ -73,12 +76,27 @@ draw = (data) ->
   # slight adjustments
   top[0] = data.chr["X"].end_Ypixel-peakRad
   right[1] = right[0] = data.chr["X"].end_Xpixel+peakRad
-  w[1] = w[0] = right[0] - left[0]
   h[0] = bottom[0] - top[0]
   data.chr["1"].start_Xpixel = left[0]
   data.chr["1"].start_Ypixel = bottom[0]
   data.chr["X"].end_Xpixel = right[0]
   data.chr["X"].end_Ypixel = top[0]
+
+  # chr scales in lower figure
+  chrLowXScale = {}
+  cur = Math.round(pad.left + chrGap/2)
+  for c in data.chrnames
+    data.chr[c].start_lowerXpixel = cur
+    data.chr[c].end_lowerXpixel = cur + Math.round((w[1]-chrGap*(data.chrnames.length))/totalChrLength*data.chr[c].length_cM)
+    chrLowXScale[c] = d3.scale.linear()
+                        .domain([data.chr[c].start_cM, data.chr[c].end_cM])
+                        .range([data.chr[c].start_lowerXpixel, data.chr[c].end_lowerXpixel])
+    cur = data.chr[c].end_lowerXpixel + chrGap
+
+  # slight adjustments
+  data.chr["1"].start_lowerXpixel = left[1]
+  data.chr["X"].end_lowerXpixel = right[1]
+
 
   # create SVGs
   svg = d3.select("div#cistrans").append("svg")
@@ -113,13 +131,19 @@ draw = (data) ->
   for ci,i in data.chrnames
       if(i % 2 == 0)
         checkerboard2.append("rect")
-           .attr("x", data.chr[ci].start_Xpixel)
-           .attr("width", data.chr[ci].end_Xpixel - data.chr[ci].start_Xpixel)
+           .attr("x", data.chr[ci].start_lowerXpixel)
+           .attr("width", data.chr[ci].end_lowerXpixel - data.chr[ci].start_lowerXpixel)
            .attr("y", top[1])
            .attr("height", h[1])
            .attr("stroke", "none")
            .attr("fill", darkGray)
            .style("pointer-events", "none")
+
+  # use just the peaks with LOD > 10
+  tmp = []
+  for p in data.peaks
+    tmp.push(p) if p.lod > 10
+  data.peaks = tmp
 
   # maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
