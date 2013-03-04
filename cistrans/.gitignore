@@ -1,3 +1,4 @@
 R/*.RData
 data/*.json
 data/*.tgz
+*.js
