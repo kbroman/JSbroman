@@ -124,8 +124,6 @@ draw = (data) ->
   # maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
 
-  console.log("before sorting: #{data.peaks[0].lod}")
-
   # sort peaks to have increasing LOD score
   data.peaks = data.peaks.sort (a,b) ->
     return if a.lod < b.lod then -1 else +1
