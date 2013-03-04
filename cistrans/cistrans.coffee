@@ -4,17 +4,15 @@ draw = (data) ->
   # dimensions of panels
   w = [800, 300]
   h = [w[0], 300]
-  w = [w[0], w[0], w[1], w[1]]
-  h = [h[0], h[1], (h[0]+h[1])/2, (h[0]+h[1])/2]
+  w = [w[0], w[0], w[1]]
+  h = [h[0], h[1], h[0]]
   pad = {left:60, top:40, right:40, bottom: 40}
 
   left = [pad.left, pad.left,
-          pad.left + w[0] + pad.right + pad.left,
           pad.left + w[0] + pad.right + pad.left]
   top =  [pad.top,
           pad.top + h[0] + pad.bottom + pad.top,
-          pad.top,
-          pad.top + h[2] + pad.bottom + pad.top]
+          pad.top]
   right = []
   bottom = []
   for i of left
@@ -26,7 +24,7 @@ draw = (data) ->
 
   # Size of rectangles in top-left panel
   peakRad = 2
-  bigRad = 4
+  bigRad = 5
 
   # height of marker ticks in lower-left panel
   tickHeight = (bottom[1] - top[1])*0.02
@@ -74,9 +72,9 @@ draw = (data) ->
 
   # slight adjustments
   top[0] = data.chr["X"].end_Ypixel-peakRad
-  right[0] = data.chr["X"].end_Xpixel+peakRad
-  w[0] = right[0] - left[0]
-  w[0] = bottom[0] - top[0]
+  right[1] = right[0] = data.chr["X"].end_Xpixel+peakRad
+  w[1] = w[0] = right[0] - left[0]
+  h[0] = bottom[0] - top[0]
   data.chr["1"].start_Xpixel = left[0]
   data.chr["1"].start_Ypixel = bottom[0]
   data.chr["X"].end_Xpixel = right[0]
@@ -110,13 +108,28 @@ draw = (data) ->
            .attr("fill", darkGray)
            .style("pointer-events", "none")
 
-  # only use peaks with LOD > 6
-  tmp = []
-  for i in data.peaks
-    tmp.push(i) if i.lod > 6
-  data.peaks = tmp
+  # same in lower-right
+  checkerboard = svg.append("g").attr("id", "checkerboard")
+  for ci,i in data.chrnames
+      if(i % 2 == 0)
+        checkerboard.append("rect")
+           .attr("x", data.chr[ci].start_Xpixel)
+           .attr("width", data.chr[ci].end_Xpixel - data.chr[ci].start_Xpixel)
+           .attr("y", top[1])
+           .attr("height", h[1])
+           .attr("stroke", "none")
+           .attr("fill", darkGray)
+           .style("pointer-events", "none")
 
-  # rectangles at eQTL peaks
+  # maximum lod score
+  maxlod = d3.max(data.peaks, (d) -> d.lod)
+
+  # LOD score controls opacity
+  Zscale = d3.scale.linear()
+             .domain([0, 25])
+             .range([0, 1])
+
+  # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
              .selectAll("empty")
              .data(data.peaks)
@@ -127,15 +140,18 @@ draw = (data) ->
              .attr("r", peakRad)
              .attr("stroke", "none")
              .attr("fill", "darkslateblue")
+             .attr("opacity", (d) -> Zscale(d.lod))
              .on "mouseover", (d) ->
                  d3.select(this).attr("r", bigRad)
                                 .attr("fill", "hotpink")
                                 .attr("stroke", "darkslateblue")
                                 .attr("stroke-width", 1)
+                                .attr("opacity", 1)
              .on "mouseout", (d) ->
                  d3.select(this).attr("r", peakRad)
                                 .attr("fill", "darkslateblue")
                                 .attr("stroke", "none")
+                                .attr("opacity", (d) -> Zscale(d.lod))
 
   # black borders
   for j of left
