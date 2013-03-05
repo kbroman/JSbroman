@@ -46,7 +46,7 @@ draw = (data) ->
   lightGray = d3.rgb(230, 230, 230)
   darkGray = d3.rgb(200, 200, 200)
   darkblue = "darkslateblue"
-  darkgreen = "darkgreen"
+  darkgreen = "darkslateblue" # "darkgreen" # <- I didn't like having separate colors for each chr in cis/trans plot
   pink = "hotpink"
   altpink = "#E9CFEC"
   purple = "#8C4374"
@@ -409,6 +409,7 @@ draw = (data) ->
     plotPXG = (marker) ->
       d3.selectAll(".plotPXG").remove()
 
+      pxgXaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG").attr("id", "pxg_xaxis")
       pxgYscale = d3.scale.linear()
                      .domain([d3.min(probe_data.pheno),
                               d3.max(probe_data.pheno)])
@@ -461,7 +462,6 @@ draw = (data) ->
       for i of means
         means[i] /= n[i]
 
-      pxgXaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG").attr("id", "pxg_xaxis")
       pxgXaxis.selectAll("empty")
               .data(means)
               .enter()
