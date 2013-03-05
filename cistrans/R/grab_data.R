@@ -36,7 +36,7 @@ names(peaks)[4] <- "pos_cM"
 # annotation information just for probes with LOD >= 5
 annot <- annot[!is.na(match(annot$a_gene_id, haspeak)),]
 annot <- annot[,c("a_gene_id", "chr", "pos.Mb", "pos.cM", "officialgenesymbol")]
-names(annot)[3:4] <- c("pos_Mbp", "pos_cM")
+names(annot)[3:5] <- c("pos_Mbp", "pos_cM", "gene")
 
 # ensembl URL for a gene; same for MGI
 # http://www.ensembl.org/Mus_musculus/Search/Details?db=core;end=1;idx=Gene;species=Mus_musculus;q=Zswim7
@@ -85,7 +85,7 @@ for(i in seq(along=peaks))
 rownames(annot) <- annot[,1]
 annot <- annot[,-1]
 annot$chr <- as.character(annot$chr)
-annot$officialgenesymbol <- as.character(annot$officialgenesymbol)
+annot$gene <- as.character(annot$gene)
 probes <- vector("list", nrow(annot))
 for(i in seq(along=probes))
     probes[[i]] <- as.list(annot[i,])
