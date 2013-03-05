@@ -133,12 +133,6 @@ draw = (data) ->
            .attr("fill", darkGray)
            .style("pointer-events", "none")
 
-  # use just the peaks with LOD > 10
-  tmp = []
-  for p in data.peaks
-    tmp.push(p) if p.lod > 10
-  data.peaks = tmp
-
   # maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
 
@@ -210,7 +204,6 @@ draw = (data) ->
          .text(titletext)
          .attr("x", (left[1]+right[1])/2)
          .attr("y", top[1] - pad.top/2)
-
 
 
   # circles at eQTL peaks
