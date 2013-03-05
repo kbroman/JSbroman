@@ -184,6 +184,15 @@ draw = (data) ->
      .attr("transform", "rotate(270,#{xloc},#{yloc})")
      .style("text-anchor", "middle")
      .attr("fill", titlecolor)
+  xloc = left[1] - pad.left*0.65
+  yloc = (top[1] + bottom[1])/2
+  axislabels.append("text")
+     .text("LOD score")
+     .attr("x", xloc)
+     .attr("y", yloc)
+     .attr("transform", "rotate(270,#{xloc},#{yloc})")
+     .style("text-anchor", "middle")
+     .attr("fill", titlecolor)
 
   # maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
