@@ -41,7 +41,7 @@ draw = (data) ->
   # colors definitions
   lightGray = d3.rgb(230, 230, 230)
   darkGray = d3.rgb(200, 200, 200)
-  pink = "#E9CFEC"
+  pink = "hotpink" # "#E9CFEC"
   purple = "#8C4374"
   # bgcolor = "black"
   labelcolor = "black"   # "white"
@@ -232,6 +232,38 @@ draw = (data) ->
     lodcurve_yScale = d3.scale.linear()
                         .domain([0, maxlod*1.05])
                         .range([bottom[1], top[1]])
+
+    # y-axis
+    yaxis = svg.append("g").attr("class", "probe_data").attr("id", "loweryaxis")
+    ticks = lodcurve_yScale.ticks(6)
+    yaxis.selectAll("empty")
+         .data(ticks)
+         .enter()
+         .append("line")
+         .attr("y1", (d) -> lodcurve_yScale(d))
+         .attr("y2", (d) -> lodcurve_yScale(d))
+         .attr("x1", left[1])
+         .attr("x2", right[1])
+         .attr("stroke", "white")
+         .attr("stroke-width", "1")
+    yaxis.selectAll("empty")
+         .data(ticks)
+         .enter()
+         .append("text")
+         .text((d) ->
+            return if maxlod > 10 then d3.format(".0f")(d) else d3.format(".1f")(d)) 
+         .attr("y", (d) -> lodcurve_yScale(d))
+         .attr("x", left[1] - pad.left*0.1)
+         .style("text-anchor", "end")
+    yaxis.append("line")
+         .attr("y1", lodcurve_yScale(5))
+         .attr("y2", lodcurve_yScale(5))
+         .attr("x1", left[1])
+         .attr("x2", right[1])
+         .attr("stroke", purple)
+         .attr("stroke-width", "1")
+         .attr("stroke-dasharray", "2,2")
+
     # lod curves by chr
     lodcurve = (c) ->
         d3.svg.line()
@@ -245,6 +277,18 @@ draw = (data) ->
             .attr("class", "thickline")
             .attr("stroke", "darkslateblue")
             .style("pointer-events", "none")
+
+    # point at probe
+    svg.append("circle")
+       .attr("class", "probe_data")
+       .attr("id", "probe_circle")
+       .attr("cx", chrLowXScale[data.probes[probe_data.probe].chr](data.probes[probe_data.probe].pos_cM))
+       .attr("cy", top[1] + pad.top*0.2)
+       .attr("r", bigRad)
+       .attr("fill", pink)
+       .attr("stroke", "darkslateblue")
+       .attr("stroke-width", 1)
+       .attr("opacity", 1)
 
     # title
     titletext = probe_data.probe
@@ -269,6 +313,15 @@ draw = (data) ->
          .attr("fill", maincolor)
          .style("font-size", "18px")
 
+    # black border
+    svg.append("rect").attr("class", "probe_data")
+       .attr("x", left[1])
+       .attr("y", top[1])
+       .attr("height", h[1])
+       .attr("width", w[1])
+       .attr("class", "outerBox")
+
+
   # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
              .selectAll("empty")
@@ -283,7 +336,7 @@ draw = (data) ->
              .attr("opacity", (d) -> Zscale(d.lod))
              .on "mouseover", (d) ->
                  d3.select(this).attr("r", bigRad)
-                                .attr("fill", "hotpink")
+                                .attr("fill", pink)
                                 .attr("stroke", "darkslateblue")
                                 .attr("stroke-width", 1)
                                 .attr("opacity", 1)
