@@ -413,7 +413,7 @@ draw = (data) ->
                      .domain([d3.min(probe_data.pheno),
                               d3.max(probe_data.pheno)])
                      .range([bottom[2]-pad.inner, top[2]+pad.inner])
-      pxgYaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG")
+      pxgYaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG").attr("id", "pxg_yaxis")
       pxgticks = pxgYscale.ticks(8)
       pxgYaxis.selectAll("empty")
          .data(pxgticks)
@@ -434,7 +434,64 @@ draw = (data) ->
          .attr("x", left[2] - pad.left*0.1)
          .style("text-anchor", "end")
 
-      svg.append("g").attr("id", "plotPXG").attr("class", "probe_data").selectAll("empty")
+      # calculate group averages
+      chr = data.pmark[marker].chr
+      if(chr is "X")
+        means = [0,0,0,0]
+        n = [0,0,0,0]
+        male = [0,0,1,1]
+        genotypes = ["RR", "BR", "BY", "RY"]
+        sexcenter = [(pxgXscaleX(0) + pxgXscaleX(1))/2,
+                     (pxgXscaleX(2) + pxgXscaleX(3))/2]
+      else
+        means = [0,0,0,0,0,0]
+        n = [0,0,0,0,0,0]
+        male = [0,0,0,1,1,1]
+        genotypes = ["BB", "BR", "RR", "BB", "BR", "RR"]
+        sexcenter = [pxgXscaleA(1), pxgXscaleA(4)]
+      for i of data.individuals
+         g = Math.abs(data.geno[marker][i])
+         sx = data.sex[i]
+         if(data.pmark[marker].chr is "X")
+           x = sx*2+g-1
+         else
+           x = sx*3+g-1
+         means[x] += probe_data.pheno[i]
+         n[x]++
+      for i of means
+        means[i] /= n[i]
+
+      pxgXaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG").attr("id", "pxg_xaxis")
+      pxgXaxis.selectAll("empty")
+              .data(means)
+              .enter()
+              .append("line")
+              .attr("y1", top[2])
+              .attr("y2", bottom[2])
+              .attr("x1", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("x2", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("stroke", darkGray)
+              .attr("fill", "none")
+              .attr("stroke-width", "1")
+      pxgXaxis.selectAll("empty")
+              .data(genotypes)
+              .enter()
+              .append("text")
+              .text((d) -> d)
+              .attr("y", bottom[2] + pad.bottom*0.25)
+              .attr("x",  (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("fill", labelcolor)
+      pxgXaxis.selectAll("empty")
+              .data(["Female", "Male"])
+              .enter()
+              .append("text")
+              .attr("id", "sextext")
+              .text((d) -> d)
+              .attr("y", bottom[j] + pad.bottom*0.75)
+              .attr("x", (d, i) -> sexcenter[i])
+              .attr("fill", labelcolor)
+
+      svg.append("g").attr("id", "plotPXG").attr("class", "probe_data").attr("id","PXGpoints").selectAll("empty")
           .data(probe_data.pheno)
           .enter()
           .append("circle")
@@ -442,7 +499,7 @@ draw = (data) ->
           .attr("cx", (d,i) ->
               g = Math.abs(data.geno[marker][i])
               sx = data.sex[i]
-              if(data.pmark[marker].chr=="X")
+              if(data.pmark[marker].chr is "X")
                 return pxgXscaleX(sx*2+g-1)+jitter[i]
               pxgXscaleA(sx*3+g-1)+jitter[i])
           .attr("cy", (d) -> pxgYscale(d))
@@ -466,28 +523,6 @@ draw = (data) ->
                d3.selectAll("#indtip").remove()
                d3.select(this).attr("r", peakRad)
 
-      # calculate group averages
-      chr = data.pmark[marker].chr
-      if(chr == "X")
-        means = [0,0,0,0]
-        n = [0,0,0,0]
-        male = [0,0,1,1]
-      else
-        means = [0,0,0,0,0,0]
-        n = [0,0,0,0,0,0]
-        male = [0,0,0,1,1,1]
-      for i of data.individuals
-         g = Math.abs(data.geno[marker][i])
-         sx = data.sex[i]
-         if(data.pmark[marker].chr=="X")
-           x = sx*2+g-1
-         else
-           x = sx*3+g-1
-         means[x] += probe_data.pheno[i]
-         n[x]++
-      for i of means
-        means[i] /= n[i]
-
       # add line segments
       svg.append("g").attr("id", "pxgmeans").attr("class", "probe_data").attr("class", "plotPXG")
          .selectAll("empty")
@@ -495,9 +530,9 @@ draw = (data) ->
          .enter()
          .append("line")
          .attr("x1", (d,i) ->
-            return if chr=="X" then pxgXscaleX(i)-jitterAmount*2 else pxgXscaleA(i)-jitterAmount*2)
+            return if chr is "X" then pxgXscaleX(i)-jitterAmount*2 else pxgXscaleA(i)-jitterAmount*2)
          .attr("x2", (d,i) ->
-            return if chr=="X" then pxgXscaleX(i)+jitterAmount*2 else pxgXscaleA(i)+jitterAmount*2)
+            return if chr is "X" then pxgXscaleX(i)+jitterAmount*2 else pxgXscaleA(i)+jitterAmount*2)
          .attr("y1", (d) -> pxgYscale(d))
          .attr("y2", (d) -> pxgYscale(d))
          .attr("stroke", (d,i) -> return if male[i] then darkblue else darkred)
@@ -520,7 +555,7 @@ draw = (data) ->
              .attr("cy", (d) -> chrYScale[data.probes[d.probe].chr](data.probes[d.probe].pos_cM))
              .attr("r", peakRad)
              .attr("stroke", "none")
-             .attr("fill", (d) -> return if(chrindex[d.chr] % 2 == 0) then darkblue else darkgreen)
+             .attr("fill", (d) -> return if(chrindex[d.chr] % 2 is 0) then darkblue else darkgreen)
              .attr("opacity", (d) -> Zscale(d.lod))
              .on "mouseover", (d) ->
                  d3.selectAll("circle.probe#{d.probe}")
@@ -533,7 +568,7 @@ draw = (data) ->
              .on "mouseout", (d) ->
                  d3.selectAll("circle.probe#{d.probe}")
                                 .attr("r", peakRad)
-                                .attr("fill", (d) -> return if(chrindex[d.chr] % 2 == 0) then darkblue else darkgreen)
+                                .attr("fill", (d) -> return if(chrindex[d.chr] % 2 is 0) then darkblue else darkgreen)
                                 .attr("stroke", "none")
                                 .attr("opacity", (d) -> Zscale(d.lod))
                  d3.selectAll("#eqtltip").remove()
