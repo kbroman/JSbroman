@@ -398,13 +398,15 @@ draw = (data) ->
               chr = data.pmark[td].chr
               title = "#{td} (chr #{chr}, #{onedig(pos)} cM)"
               d3.select("text#pxgtitle").text(title)
-              if lastMarker isnt ""
+              if lastMarker is ""
+                  plotPXG td
+              else
                   markerClick[lastMarker] = 0
                   d3.select("#circle#{lastMarker}").attr("opacity", 0).attr("fill",purple).attr("stroke","none")
+                  revPXG td
               lastMarker = td
               markerClick[td] = 1
               d3.select(this).attr("opacity", 1).attr("fill",altpink).attr("stroke",purple)
-              plotPXG td
 
     plotPXG = (marker) ->
       d3.selectAll(".plotPXG").remove()
@@ -466,6 +468,7 @@ draw = (data) ->
               .data(means)
               .enter()
               .append("line")
+              .attr("class", "PXGvert")
               .attr("y1", top[2])
               .attr("y2", bottom[2])
               .attr("x1", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
@@ -477,6 +480,7 @@ draw = (data) ->
               .data(genotypes)
               .enter()
               .append("text")
+              .attr("class", "PXGgeno")
               .text((d) -> d)
               .attr("y", bottom[2] + pad.bottom*0.25)
               .attr("x",  (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
@@ -485,6 +489,7 @@ draw = (data) ->
               .data(["Female", "Male"])
               .enter()
               .append("text")
+              .attr("class", "PXGsex")
               .attr("id", "sextext")
               .text((d) -> d)
               .attr("y", bottom[j] + pad.bottom*0.75)
@@ -529,6 +534,7 @@ draw = (data) ->
          .data(means)
          .enter()
          .append("line")
+         .attr("class", "PXGmeans")
          .attr("x1", (d,i) ->
             return if chr is "X" then pxgXscaleX(i)-jitterAmount*2 else pxgXscaleA(i)-jitterAmount*2)
          .attr("x2", (d,i) ->
@@ -539,6 +545,52 @@ draw = (data) ->
          .attr("stroke-width", 4)
          .on("mouseover", efftip)
          .on("mouseout", -> d3.selectAll("#efftip").remove())
+
+
+    revPXG = (marker) ->
+      # calculate group averages
+      chr = data.pmark[marker].chr
+      if(chr is "X")
+        means = [0,0,0,0]
+        n = [0,0,0,0]
+        male = [0,0,1,1]
+        genotypes = ["RR", "BR", "BY", "RY"]
+        sexcenter = [(pxgXscaleX(0) + pxgXscaleX(1))/2,
+                     (pxgXscaleX(2) + pxgXscaleX(3))/2]
+      else
+        means = [0,0,0,0,0,0]
+        n = [0,0,0,0,0,0]
+        male = [0,0,0,1,1,1]
+        genotypes = ["BB", "BR", "RR", "BB", "BR", "RR"]
+        sexcenter = [pxgXscaleA(1), pxgXscaleA(4)]
+      for i of data.individuals
+         g = Math.abs(data.geno[marker][i])
+         sx = data.sex[i]
+         if(data.pmark[marker].chr is "X")
+           x = sx*2+g-1
+         else
+           x = sx*3+g-1
+         means[x] += probe_data.pheno[i]
+         n[x]++
+      for i of means
+        means[i] /= n[i]
+
+      d3.selectAll("line.PXGvert")
+         .data(genotypes)
+      d3.selectAll("line.PXGmeans")
+         .data(means)
+      d3.selectAll("text.PXGgeno")
+      d3.selectAll("text.PXGsex")
+         .attr("x", (d, i) -> sexcenter[i])
+
+      d3.selectAll("circle.plotPXG")
+         .transition().duration(1000)
+        .attr("cx", (d,i) -> 
+              g = Math.abs(data.geno[marker][i])
+              sx = data.sex[i]
+              if(data.pmark[marker].chr is "X")
+                return pxgXscaleX(sx*2+g-1)+jitter[i]
+              pxgXscaleA(sx*3+g-1)+jitter[i])
 
   chrindex = {}
   for c,i in data.chrnames
