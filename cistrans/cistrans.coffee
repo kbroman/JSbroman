@@ -4,7 +4,7 @@ draw = (data) ->
   # dimensions of panels
   w = [800, 300]
   h = [w[0], 300]
-  pad = {left:60, top:40, right:40, bottom: 40}
+  pad = {left:60, top:40, right:40, bottom: 40, inner: 10}
   w = [w[0], w[0] + w[1] + pad.left + pad.right, w[1]]
   h = [h[0], h[1], h[0]]
 
@@ -33,18 +33,24 @@ draw = (data) ->
   tickHeight = (bottom[1] - top[1])*0.02
 
   # jitter amounts for PXG plot
-  jitterAmount = (right[3] - left[3])/50
+  jitterAmount = (right[2] - left[2])/50
   jitter = []
-  for i of data.phevals
+  for i of data.individuals
     jitter[i] = (2.0*Math.random()-1.0) * jitterAmount
+
+  nodig = d3.format(".0f")
+  onedig = d3.format(".1f")
+  twodig = d3.format(".2f")
 
   # colors definitions
   lightGray = d3.rgb(230, 230, 230)
   darkGray = d3.rgb(200, 200, 200)
   darkblue = "darkslateblue"
   darkgreen = "darkgreen"
-  pink = "hotpink" # "#E9CFEC"
+  pink = "hotpink"
+  altpink = "#E9CFEC"
   purple = "#8C4374"
+  darkred = "crimson"
   # bgcolor = "black"
   labelcolor = "black"   # "white"
   titlecolor = "blue"    # "Wheat"
@@ -97,6 +103,16 @@ draw = (data) ->
                         .domain([data.chr[c].start_cM, data.chr[c].end_cM])
                         .range([data.chr[c].start_lowerXpixel, data.chr[c].end_lowerXpixel])
     cur = data.chr[c].end_lowerXpixel + chrGap
+
+  # X scales for PXG plot
+  # autosome in intercross: 6 cases
+  pxgXscaleA = d3.scale.ordinal()
+                 .domain(d3.range(6))
+                 .rangePoints([left[2], right[2]], 1)
+  # X chromosome in intercross (both sexes, one direction): 4 cases
+  pxgXscaleX = d3.scale.ordinal()
+                 .domain(d3.range(4))
+                 .rangePoints([left[2], right[2]], 1)
 
   # create SVGs
   svg = d3.select("div#cistrans").append("svg")
@@ -213,9 +229,27 @@ draw = (data) ->
   eqtltip = d3.svg.tip()
                  .orient("right")
                  .padding(3)
-                 .text((z) -> "#{z.probe} (LOD = #{d3.format('.1f')(z.lod)})")
+                 .text((z) -> "#{z.probe} (LOD = #{onedig(z.lod)})")
                  .attr("class", "d3-tip")
                  .attr("id", "eqtltip")
+  martip = d3.svg.tip()
+             .orient("right")
+             .padding(3)
+             .text((z) -> z)
+             .attr("class", "d3-tip")
+             .attr("id", "martip")
+  indtip = d3.svg.tip()
+             .orient("right")
+             .padding(3)
+             .text((d,i) -> data.individuals[i])
+             .attr("class", "d3-tip")
+             .attr("id", "indtip")
+  efftip = d3.svg.tip()
+             .orient("right")
+             .padding(3)
+             .text((d) -> twodig(d))
+             .attr("class", "d3-tip")
+             .attr("id", "efftip")
 
   # create indices to lod scores, split by chromosome
   cur = 0
@@ -228,6 +262,8 @@ draw = (data) ->
   draw_probe = (probe_data) ->
     # delete all related stuff
     svg.selectAll(".probe_data").remove()
+    d3.select("text#pxgtitle").text("")
+    svg.selectAll(".plotPXG").remove()
     # max lod
     maxlod = d3.max(probe_data.lod)
     # y-axis scale
@@ -253,7 +289,7 @@ draw = (data) ->
          .enter()
          .append("text")
          .text((d) ->
-            return if maxlod > 10 then d3.format(".0f")(d) else d3.format(".1f")(d))
+            return if maxlod > 10 then nodig(d) else onedig(d))
          .attr("y", (d) -> lodcurve_yScale(d))
          .attr("x", left[1] - pad.left*0.1)
          .style("text-anchor", "end")
@@ -322,6 +358,152 @@ draw = (data) ->
        .attr("stroke", darkblue)
        .attr("stroke-width", 1)
        .attr("opacity", 1)
+
+    svg.append("text")
+       .attr("id", "pxgtitle")
+       .attr("x", (left[2]+right[2])/2)
+       .attr("y", pad.top/2)
+       .text("")
+       .attr("fill", maincolor)
+
+    # keep track of clicked marker
+    markerClick = {}
+    for m in data.markers
+      markerClick[m] = 0
+    lastMarker = ""
+
+    # dots at markers on LOD curves
+    svg.append("g").attr("id", "markerCircle").attr("class", "probe_data")
+       .selectAll("empty")
+       .data(data.markers)
+       .enter()
+       .append("circle")
+       .attr("class", "probe_data")
+       .attr("id", (td) -> "circle#{td}")
+       .attr("cx", (td) -> chrLowXScale[data.pmark[td].chr](data.pmark[td].pos_cM))
+       .attr("cy", (td) -> lodcurve_yScale(probe_data.lod[data.pmark[td].index]))
+       .attr("r", bigRad)
+       .attr("fill", purple)
+       .attr("stroke", "none")
+       .attr("stroke-width", "2")
+       .attr("opacity", 0)
+       .on("mouseover", (td) ->
+              d3.select(this).attr("opacity", 1) unless markerClick[td]
+              martip.call(this,td))
+       .on "mouseout", (td) ->
+              d3.select(this).attr("opacity", markerClick[td])
+              d3.selectAll("#martip").remove()
+       .on "click", (td) ->
+              pos = data.pmark[td].pos_cM
+              chr = data.pmark[td].chr
+              title = "#{td} (chr #{chr}, #{onedig(pos)} cM)"
+              d3.select("text#pxgtitle").text(title)
+              if lastMarker isnt ""
+                  markerClick[lastMarker] = 0
+                  d3.select("#circle#{lastMarker}").attr("opacity", 0).attr("fill",purple).attr("stroke","none")
+              lastMarker = td
+              markerClick[td] = 1
+              d3.select(this).attr("opacity", 1).attr("fill",altpink).attr("stroke",purple)
+              plotPXG td
+
+    plotPXG = (marker) ->
+      d3.selectAll(".plotPXG").remove()
+
+      pxgYscale = d3.scale.linear()
+                     .domain([d3.min(probe_data.pheno),
+                              d3.max(probe_data.pheno)])
+                     .range([bottom[2]-pad.inner, top[2]+pad.inner])
+      pxgYaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG")
+      pxgticks = pxgYscale.ticks(8)
+      pxgYaxis.selectAll("empty")
+         .data(pxgticks)
+         .enter()
+         .append("line")
+         .attr("y1", (d) -> pxgYscale(d))
+         .attr("y2", (d) -> pxgYscale(d))
+         .attr("x1", left[2])
+         .attr("x2", right[2])
+         .attr("stroke", "white")
+         .attr("stroke-width", "1")
+      pxgYaxis.selectAll("empty")
+         .data(pxgticks)
+         .enter()
+         .append("text")
+         .text((d) -> twodig(d))
+         .attr("y", (d) -> pxgYscale(d))
+         .attr("x", left[2] - pad.left*0.1)
+         .style("text-anchor", "end")
+
+      svg.append("g").attr("id", "plotPXG").attr("class", "probe_data").selectAll("empty")
+          .data(probe_data.pheno)
+          .enter()
+          .append("circle")
+          .attr("class", "plotPXG")
+          .attr("cx", (d,i) ->
+              g = Math.abs(data.geno[marker][i])
+              sx = data.sex[i]
+              if(data.pmark[marker].chr=="X")
+                return pxgXscaleX(sx*2+g-1)+jitter[i]
+              pxgXscaleA(sx*3+g-1)+jitter[i])
+          .attr("cy", (d) -> pxgYscale(d))
+          .attr("r", peakRad)
+          .attr("fill", (d,i) ->
+              g = data.geno[marker][i]
+              return pink if g < 0
+              darkGray)
+           .attr("stroke", (d,i) ->
+               g = data.geno[marker][i]
+               return purple if g < 0
+               "black")
+          .attr("stroke-width", (d,i) ->
+               g = data.geno[marker][i]
+               return "2" if g < 0
+               "1")
+          .on "mouseover", (d,i) ->
+               d3.select(this).attr("r", bigRad)
+               indtip.call(this, d, i)
+          .on "mouseout", ->
+               d3.selectAll("#indtip").remove()
+               d3.select(this).attr("r", peakRad)
+
+      # calculate group averages
+      chr = data.pmark[marker].chr
+      if(chr == "X")
+        means = [0,0,0,0]
+        n = [0,0,0,0]
+        male = [0,0,1,1]
+      else
+        means = [0,0,0,0,0,0]
+        n = [0,0,0,0,0,0]
+        male = [0,0,0,1,1,1]
+      for i of data.individuals
+         g = Math.abs(data.geno[marker][i])
+         sx = data.sex[i]
+         if(data.pmark[marker].chr=="X")
+           x = sx*2+g-1
+         else
+           x = sx*3+g-1
+         means[x] += probe_data.pheno[i]
+         n[x]++
+      for i of means
+        means[i] /= n[i]
+
+      # add line segments
+      svg.append("g").attr("id", "pxgmeans").attr("class", "probe_data").attr("class", "plotPXG")
+         .selectAll("empty")
+         .data(means)
+         .enter()
+         .append("line")
+         .attr("x1", (d,i) ->
+            return if chr=="X" then pxgXscaleX(i)-jitterAmount*2 else pxgXscaleA(i)-jitterAmount*2)
+         .attr("x2", (d,i) ->
+            return if chr=="X" then pxgXscaleX(i)+jitterAmount*2 else pxgXscaleA(i)+jitterAmount*2)
+         .attr("y1", (d) -> pxgYscale(d))
+         .attr("y2", (d) -> pxgYscale(d))
+         .attr("stroke", (d,i) -> return if male[i] then darkblue else darkred)
+         .attr("stroke-width", 4)
+         .on("mouseover", efftip)
+         .on("mouseout", -> d3.selectAll("#efftip").remove())
 
   chrindex = {}
   for c,i in data.chrnames
