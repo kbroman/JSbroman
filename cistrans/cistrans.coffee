@@ -75,7 +75,6 @@ draw = (data) ->
 
   # slight adjustments
   top[0] = data.chr["X"].end_Ypixel-peakRad
-  right[1] = right[0] = data.chr["X"].end_Xpixel+peakRad
   h[0] = bottom[0] - top[0]
   data.chr["1"].start_Xpixel = left[0]
   data.chr["1"].start_Ypixel = bottom[0]
@@ -167,9 +166,57 @@ draw = (data) ->
                  .attr("id", "eqtltip")
 
 
+  # create indices to lod scores, split by chromosome
+  cur = 0
+  for c in data.chrnames
+    for p in data.pmarknames[c]
+      data.pmark[p].index = cur
+      cur++
+
   # function for drawing lod curve for probe
   draw_probe = (probe_data) ->
-    console.log("click! #{probe_data.probe}")
+    # delete all related stuff
+    svg.selectAll(".probe_data").remove()
+    # max lod
+    maxlod = d3.max(probe_data.lod)
+    # y-axis scale
+    lodcurve_yScale = d3.scale.linear()
+                        .domain([0, maxlod*1.05])
+                        .range([bottom[1], top[1]])
+    # lod curves by chr
+    lodcurve = (c) ->
+        d3.svg.line()
+          .x((p) -> chrLowXScale[c](data.pmark[p].pos_cM))
+          .y((p) -> lodcurve_yScale(probe_data.lod[data.pmark[p].index]))
+    curves = svg.append("g").attr("id", "curves").attr("class", "probe_data")
+    for c in data.chrnames
+      curves.append("path")
+            .datum(data.pmarknames[c])
+            .attr("d", lodcurve(c))
+            .attr("class", "thickline")
+            .attr("stroke", "darkslateblue")
+            .style("pointer-events", "none")
+
+    # title
+    titletext = probe_data.probe
+    probeaxes = svg.append("g").attr("id", "probe_data_axes").attr("class", "probe_data")
+    gene = data.probes[probe_data.probe].gene
+    ensembl = "http://www.ensembl.org/Mus_musculus/Search/Details?db=core;end=1;idx=Gene;species=Mus_musculus;q=#{gene}"
+    mgi = "http://www.informatics.jax.org/searchtool/Search.do?query=#{gene}"
+    if gene isnt null
+      titletext += " (#{gene})"
+      xlink = probeaxes.append("a").attr("xlink:href", mgi)
+      xlink.append("text")
+         .text(titletext)
+         .attr("x", (left[1]+right[1])/2)
+         .attr("y", top[1] - pad.top/2)
+    else
+      probeaxes.append("text")
+         .text(titletext)
+         .attr("x", (left[1]+right[1])/2)
+         .attr("y", top[1] - pad.top/2)
+
+
 
   # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
