@@ -92,11 +92,6 @@ draw = (data) ->
                         .range([data.chr[c].start_lowerXpixel, data.chr[c].end_lowerXpixel])
     cur = data.chr[c].end_lowerXpixel + chrGap
 
-  # slight adjustments
-  data.chr["1"].start_lowerXpixel = left[1]
-  data.chr["X"].end_lowerXpixel = right[1]
-
-
   # create SVGs
   svg = d3.select("div#cistrans").append("svg")
           .attr("width", totalw)
@@ -130,8 +125,8 @@ draw = (data) ->
   for ci,i in data.chrnames
       if(i % 2 == 0)
         checkerboard2.append("rect")
-           .attr("x", data.chr[ci].start_lowerXpixel)
-           .attr("width", data.chr[ci].end_lowerXpixel - data.chr[ci].start_lowerXpixel)
+           .attr("x", data.chr[ci].start_lowerXpixel - chrGap/2)
+           .attr("width", data.chr[ci].end_lowerXpixel - data.chr[ci].start_lowerXpixel + chrGap)
            .attr("y", top[1])
            .attr("height", h[1])
            .attr("stroke", "none")
