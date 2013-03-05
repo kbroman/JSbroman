@@ -278,18 +278,6 @@ draw = (data) ->
             .attr("stroke", "darkslateblue")
             .style("pointer-events", "none")
 
-    # point at probe
-    svg.append("circle")
-       .attr("class", "probe_data")
-       .attr("id", "probe_circle")
-       .attr("cx", chrLowXScale[data.probes[probe_data.probe].chr](data.probes[probe_data.probe].pos_cM))
-       .attr("cy", top[1] + pad.top*0.2)
-       .attr("r", bigRad)
-       .attr("fill", pink)
-       .attr("stroke", "darkslateblue")
-       .attr("stroke-width", 1)
-       .attr("opacity", 1)
-
     # title
     titletext = probe_data.probe
     probeaxes = svg.append("g").attr("id", "probe_data_axes").attr("class", "probe_data")
@@ -321,6 +309,17 @@ draw = (data) ->
        .attr("width", w[1])
        .attr("class", "outerBox")
 
+    # point at probe
+    svg.append("circle")
+       .attr("class", "probe_data")
+       .attr("id", "probe_circle")
+       .attr("cx", chrLowXScale[data.probes[probe_data.probe].chr](data.probes[probe_data.probe].pos_cM))
+       .attr("cy", top[1])
+       .attr("r", bigRad)
+       .attr("fill", pink)
+       .attr("stroke", "darkslateblue")
+       .attr("stroke-width", 1)
+       .attr("opacity", 1)
 
   # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
