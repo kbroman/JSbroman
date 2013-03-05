@@ -1,5 +1,6 @@
 # grab data for interactive cistrans plot
 rm(list=ls())
+minlod = 10
 
 # annotation information
 attach("annot.amit_rev.RData")
@@ -7,19 +8,19 @@ annot <- annot[!is.na(annot$chr) & !is.na(match(annot$chr, c(1:19, "X"))),]
 
 # maximum LOD for each probe on each chromosome and where it occurred
 attach("maxlod.islet.RData")
-# probes with LOD >= 5
-haspeak <- colnames(maxlod.islet$maxlod)[apply(maxlod.islet$maxlod, 2, max, na.rm=TRUE) >= 5]
+# probes with LOD >= minlod
+haspeak <- colnames(maxlod.islet$maxlod)[apply(maxlod.islet$maxlod, 2, max, na.rm=TRUE) >= minlod]
 haspeak <- haspeak[!is.na(match(haspeak, annot$a_gene_id))]
 
-# subset: just probes with LOD >= 5
+# subset: just probes with LOD >= minlod
 ml.islet <-
   list(lod = maxlod.islet$maxlod[,haspeak],
        pos = maxlod.islet$maxlod[,haspeak])
 for(i in 1:20)
   ml.islet$pos[i,] <- maxlod.islet$maxlod.pos[[i]][haspeak]
 
-# data frame with peaks >= 5 and where they occurred
-wh <- which(ml.islet$lod >= 5)
+# data frame with peaks >= minlod and where they occurred
+wh <- which(ml.islet$lod >= minlod)
 peaks <- data.frame(a_gene_id=colnames(ml.islet$lod)[col(ml.islet$lod)[wh]],
                     lod = ml.islet$lod[wh],
                     chr = c(1:19,"X")[row(ml.islet$lod)[wh]],
