@@ -408,6 +408,8 @@ draw = (data) ->
               markerClick[td] = 1
               d3.select(this).attr("opacity", 1).attr("fill",altpink).attr("stroke",purple)
 
+    pxgYscale = -> null
+
     plotPXG = (marker) ->
       d3.selectAll(".plotPXG").remove()
 
@@ -575,17 +577,15 @@ draw = (data) ->
       for i of means
         means[i] /= n[i]
 
-      d3.selectAll("line.PXGvert")
-         .data(genotypes)
-      d3.selectAll("line.PXGmeans")
-         .data(means)
-      d3.selectAll("text.PXGgeno")
-      d3.selectAll("text.PXGsex")
-         .attr("x", (d, i) -> sexcenter[i])
+      console.log(means)
+#      svg.selectAll("line.PXGvert").transition().data(means).exit().remove()
+#      svg.selectAll("line.PXGmeans").transition().data(means).exit().remove()
+#      svg.selectAll("text.PXGgeno").transition().data(means)
+#      svg.selectAll("text.PXGsex").transition().attr("x", (d,i) -> sexcenter[i]).exit().remove()
 
-      d3.selectAll("circle.plotPXG")
+      svg.selectAll("circle.plotPXG")
          .transition().duration(1000)
-        .attr("cx", (d,i) -> 
+         .attr("cx", (d,i) -> 
               g = Math.abs(data.geno[marker][i])
               sx = data.sex[i]
               if(data.pmark[marker].chr is "X")
