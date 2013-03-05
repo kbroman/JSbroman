@@ -251,7 +251,7 @@ draw = (data) ->
          .enter()
          .append("text")
          .text((d) ->
-            return if maxlod > 10 then d3.format(".0f")(d) else d3.format(".1f")(d)) 
+            return if maxlod > 10 then d3.format(".0f")(d) else d3.format(".1f")(d))
          .attr("y", (d) -> lodcurve_yScale(d))
          .attr("x", left[1] - pad.left*0.1)
          .style("text-anchor", "end")
