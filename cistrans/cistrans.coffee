@@ -211,7 +211,7 @@ draw = (data) ->
   eqtltip = d3.svg.tip()
                  .orient("right")
                  .padding(3)
-                 .text((z) -> "#{z.probe} (LOD = #{d3.format('.2f')(z.lod)})")
+                 .text((z) -> "#{z.probe} (LOD = #{d3.format('.1f')(z.lod)})")
                  .attr("class", "d3-tip")
                  .attr("id", "eqtltip")
 
