@@ -43,6 +43,10 @@ draw = (data) ->
   darkGray = d3.rgb(200, 200, 200)
   pink = "#E9CFEC"
   purple = "#8C4374"
+  # bgcolor = "black"
+  labelcolor = "black"   # "white"
+  titlecolor = "blue"    # "Wheat"
+  maincolor = "darkblue" # "Wheat"
 
   # calculate X and Y scales, using cM positions
   totalChrLength = 0;
@@ -133,6 +137,54 @@ draw = (data) ->
            .attr("fill", darkGray)
            .style("pointer-events", "none")
 
+  # chromosome labels
+  axislabels = svg.append("g").attr("id", "axislabels").style("pointer-events", "none")
+  axislabels.append("g").attr("id", "topleftX").selectAll("empty")
+     .data(data.chrnames)
+     .enter()
+     .append("text")
+     .text((d) -> d)
+     .attr("x", (d) -> (data.chr[d].start_Xpixel + data.chr[d].end_Xpixel)/2)
+     .attr("y", bottom[0] + pad.bottom*0.3)
+     .attr("fill", labelcolor)
+  axislabels.append("g").attr("id", "topleftY")
+     .selectAll("empty")
+     .data(data.chrnames)
+     .enter()
+     .append("text")
+     .text((d) -> d)
+     .attr("x", left[0] - pad.left*0.15)
+     .attr("y", (d) -> (data.chr[d].start_Ypixel + data.chr[d].end_Ypixel)/2)
+     .style("text-anchor", "end")
+     .attr("fill", labelcolor)
+  axislabels.append("g").attr("id", "bottomX").selectAll("empty")
+     .data(data.chrnames)
+     .enter()
+     .append("text")
+     .text((d) -> d)
+     .attr("x", (d) -> (data.chr[d].start_lowerXpixel + data.chr[d].end_lowerXpixel)/2)
+     .attr("y", bottom[1] + pad.bottom*0.3)
+     .attr("fill", labelcolor)
+  axislabels.append("text")
+     .text("Marker position (cM)")
+     .attr("x", (left[0] + right[0])/2)
+     .attr("y", bottom[0] + pad.bottom*0.75)
+     .attr("fill", titlecolor)
+  axislabels.append("text")
+     .text("Position (cM)")
+     .attr("x", (left[1] + right[1])/2)
+     .attr("y", bottom[1] + pad.bottom*0.75)
+     .attr("fill", titlecolor)
+  xloc = left[0] - pad.left*0.65
+  yloc = (top[0] + bottom[0])/2
+  axislabels.append("text")
+     .text("Probe position (cM)")
+     .attr("x", xloc)
+     .attr("y", yloc)
+     .attr("transform", "rotate(270,#{xloc},#{yloc})")
+     .style("text-anchor", "middle")
+     .attr("fill", titlecolor)
+
   # maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
 
@@ -153,7 +205,6 @@ draw = (data) ->
                  .text((z) -> "#{z.probe} (LOD = #{d3.format('.2f')(z.lod)})")
                  .attr("class", "d3-tip")
                  .attr("id", "eqtltip")
-
 
   # create indices to lod scores, split by chromosome
   cur = 0
@@ -199,12 +250,15 @@ draw = (data) ->
          .text(titletext)
          .attr("x", (left[1]+right[1])/2)
          .attr("y", top[1] - pad.top/2)
+         .attr("fill", maincolor)
+         .style("font-size", "18px")
     else
       probeaxes.append("text")
          .text(titletext)
          .attr("x", (left[1]+right[1])/2)
          .attr("y", top[1] - pad.top/2)
-
+         .attr("fill", maincolor)
+         .style("font-size", "18px")
 
   # circles at eQTL peaks
   peaks = svg.append("g").attr("id", "peaks")
