@@ -42,7 +42,7 @@ draw = (data) ->
   lightGray = d3.rgb(230, 230, 230)
   darkGray = d3.rgb(200, 200, 200)
   darkblue = "darkslateblue"
-  darkgreen = "darkslateblue" # <- was highlighting eqtl peaks in different colors, but I didn't like it
+  darkgreen = "darkgreen"
   pink = "hotpink" # "#E9CFEC"
   purple = "#8C4374"
   # bgcolor = "black"
@@ -333,30 +333,25 @@ draw = (data) ->
              .data(data.peaks)
              .enter()
              .append("circle")
+             .attr("class", (d) -> "probe#{d.probe}")
              .attr("cx", (d) -> chrXScale[d.chr](d.pos_cM))
              .attr("cy", (d) -> chrYScale[data.probes[d.probe].chr](data.probes[d.probe].pos_cM))
              .attr("r", peakRad)
              .attr("stroke", "none")
-             .attr("fill", (d) ->
-                 if (chrindex[d.chr] + chrindex[data.probes[d.probe].chr]) % 2 == 0
-                   return darkblue
-                 else
-                   return darkgreen)
+             .attr("fill", (d) -> return if(chrindex[d.chr] % 2 == 0) then darkblue else darkgreen)
              .attr("opacity", (d) -> Zscale(d.lod))
              .on "mouseover", (d) ->
-                 d3.select(this).attr("r", bigRad)
+                 d3.selectAll("circle.probe#{d.probe}")
+                                .attr("r", bigRad)
                                 .attr("fill", pink)
                                 .attr("stroke", darkblue)
                                 .attr("stroke-width", 1)
                                 .attr("opacity", 1)
                  eqtltip.call(this,d)
              .on "mouseout", (d) ->
-                 d3.select(this).attr("r", peakRad)
-                                .attr("fill", (d) ->
-                                    if (chrindex[d.chr] + chrindex[data.probes[d.probe].chr]) % 2 == 0
-                                      return darkblue
-                                    else
-                                      return darkgreen)
+                 d3.selectAll("circle.probe#{d.probe}")
+                                .attr("r", peakRad)
+                                .attr("fill", (d) -> return if(chrindex[d.chr] % 2 == 0) then darkblue else darkgreen)
                                 .attr("stroke", "none")
                                 .attr("opacity", (d) -> Zscale(d.lod))
                  d3.selectAll("#eqtltip").remove()
