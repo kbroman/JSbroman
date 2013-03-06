@@ -1,3 +1,17 @@
+# lod_and_effect.coffee
+# 
+# Interactive lod curve and QTL effect plot
+#
+# Click on chromosome in top panel for detailed view below
+#
+# In lower-left panel: hover over markers to see names;
+# click to view effect plot and phenotype-vs-genotype plot
+#
+# In effect plot, hover over means to see values
+# In pheno-vs-geno plot, hover over points to see individual ID
+#
+# This is awful code; I just barely know what I'm doing.
+
 # function that does all of the work
 draw = (data) ->
 
