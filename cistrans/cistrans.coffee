@@ -114,7 +114,7 @@ draw = (data) ->
                  .domain(d3.range(4))
                  .rangePoints([left[2], right[2]], 1)
 
-  # create SVGs
+  # create SVG
   svg = d3.select("div#cistrans").append("svg")
           .attr("width", totalw)
           .attr("height", totalh)
@@ -212,7 +212,7 @@ draw = (data) ->
      .style("text-anchor", "middle")
      .attr("fill", titlecolor)
 
-  # maximum lod score
+  # overall maximum lod score
   maxlod = d3.max(data.peaks, (d) -> d.lod)
 
   # sort peaks to have increasing LOD score
@@ -224,7 +224,7 @@ draw = (data) ->
              .domain([0, 25])
              .range([0, 1])
 
-  # Using https://github.com/Caged/d3-tip
+  # tool tips using https://github.com/Caged/d3-tip
   #   [slightly modified in https://github.com/kbroman/d3-tip]
   eqtltip = d3.svg.tip()
                  .orient("right")
@@ -408,12 +408,65 @@ draw = (data) ->
               markerClick[td] = 1
               d3.select(this).attr("opacity", 1).attr("fill",altpink).attr("stroke",purple)
 
-    pxgYscale = -> null
+    draw_pxgXaxis = (pxgXaxis, means, genotypes, chr, sexcenter) ->
+      pxgXaxis.selectAll("line.PXGvert")
+              .data(means)
+              .enter()
+              .append("line")
+              .attr("class", "PXGvert")
+              .attr("y1", top[2])
+              .attr("y2", bottom[2])
+              .attr("x1", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("x2", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("stroke", darkGray)
+              .attr("fill", "none")
+              .attr("stroke-width", "1")
+      pxgXaxis.selectAll("line.PXGvert")
+              .data(means)
+              .transition().duration(250)
+              .attr("x1", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("x2", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+      pxgXaxis.selectAll("line.PXGvert")
+              .data(means)
+              .exit().remove()
+      pxgXaxis.selectAll("text.PXGgeno")
+              .data(genotypes)
+              .enter()
+              .append("text")
+              .attr("class", "PXGgeno")
+              .text((d) -> d)
+              .attr("y", bottom[2] + pad.bottom*0.25)
+              .attr("x",  (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+              .attr("fill", labelcolor)
+      pxgXaxis.selectAll("text.PXGgeno")
+              .data(genotypes)
+              .transition().duration(250)
+              .text((d) -> d)
+              .attr("x",  (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
+      pxgXaxis.selectAll("text.PXGgeno")
+              .data(genotypes)
+              .exit().remove()
+      pxgXaxis.selectAll("text.PXGsex")
+              .data(["Female", "Male"])
+              .enter()
+              .append("text")
+              .attr("class", "PXGsex")
+              .attr("id", "sextext")
+              .text((d) -> d)
+              .attr("y", bottom[j] + pad.bottom*0.75)
+              .attr("x", (d, i) -> sexcenter[i])
+              .attr("fill", labelcolor)
+      pxgXaxis.selectAll("text.PXGsex")
+              .data(["Female", "Male"])
+              .transition().duration(250)
+              .attr("x", (d, i) -> sexcenter[i])
+      pxgXaxis.selectAll("text.PXGsex")
+              .data(["Female", "Male"])
+              .exit().remove()
 
+    pxgYscale = null
+    pxgXaxis = svg.append("g").attr("class", "probe_data").attr("id", "pxg_xaxis")
     plotPXG = (marker) ->
-      d3.selectAll(".plotPXG").remove()
-
-      pxgXaxis = svg.append("g").attr("class", "probe_data").attr("class", "plotPXG").attr("id", "pxg_xaxis")
       pxgYscale = d3.scale.linear()
                      .domain([d3.min(probe_data.pheno),
                               d3.max(probe_data.pheno)])
@@ -466,37 +519,7 @@ draw = (data) ->
       for i of means
         means[i] /= n[i]
 
-      pxgXaxis.selectAll("empty")
-              .data(means)
-              .enter()
-              .append("line")
-              .attr("class", "PXGvert")
-              .attr("y1", top[2])
-              .attr("y2", bottom[2])
-              .attr("x1", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
-              .attr("x2", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
-              .attr("stroke", darkGray)
-              .attr("fill", "none")
-              .attr("stroke-width", "1")
-      pxgXaxis.selectAll("empty")
-              .data(genotypes)
-              .enter()
-              .append("text")
-              .attr("class", "PXGgeno")
-              .text((d) -> d)
-              .attr("y", bottom[2] + pad.bottom*0.25)
-              .attr("x",  (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
-              .attr("fill", labelcolor)
-      pxgXaxis.selectAll("empty")
-              .data(["Female", "Male"])
-              .enter()
-              .append("text")
-              .attr("class", "PXGsex")
-              .attr("id", "sextext")
-              .text((d) -> d)
-              .attr("y", bottom[j] + pad.bottom*0.75)
-              .attr("x", (d, i) -> sexcenter[i])
-              .attr("fill", labelcolor)
+      draw_pxgXaxis(pxgXaxis, means, genotypes, chr, sexcenter)
 
       svg.append("g").attr("id", "plotPXG").attr("class", "probe_data").attr("id","PXGpoints").selectAll("empty")
           .data(probe_data.pheno)
@@ -577,14 +600,10 @@ draw = (data) ->
       for i of means
         means[i] /= n[i]
 
-      console.log(means)
-#      svg.selectAll("line.PXGvert").transition().data(means).exit().remove()
-#      svg.selectAll("line.PXGmeans").transition().data(means).exit().remove()
-#      svg.selectAll("text.PXGgeno").transition().data(means)
-#      svg.selectAll("text.PXGsex").transition().attr("x", (d,i) -> sexcenter[i]).exit().remove()
+      draw_pxgXaxis(pxgXaxis, means, genotypes, chr, sexcenter)
 
       svg.selectAll("circle.plotPXG")
-         .transition().duration(1000)
+         .transition().delay(250).duration(750)
          .attr("cx", (d,i) -> 
               g = Math.abs(data.geno[marker][i])
               sx = data.sex[i]
