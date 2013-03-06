@@ -25,8 +25,8 @@
 draw = (data) ->
 
   # dimensions of panels
-  w = [800, 300]
-  h = [w[0], 300]
+  w = [500, 300]
+  h = [w[0], 200]
   pad = {left:60, top:40, right:40, bottom: 40, inner: 10}
   w = [w[0], w[0] + w[1] + pad.left + pad.right, w[1]]
   h = [h[0], h[1], h[0]]
