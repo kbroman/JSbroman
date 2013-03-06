@@ -42,7 +42,9 @@ randomize_data = ->
     d.x = jitter_value(d.x, w)
     d.y = jitter_value(d.y, h)
 
-recreate_points = ->
+recreate_points = (duration) ->
+   duration ?= 1000
+  
    svg.selectAll("circle.points")
       .data(data)
       .enter()
@@ -56,13 +58,12 @@ recreate_points = ->
       .attr("stroke-width", 2)
    svg.selectAll("circle.points")
       .data(data)
-      .transition().duration(1000)
+      .transition().duration(duration)
       .attr("cx", (d) -> d.x+pad)
       .attr("cy", (d) -> d.y+pad)
    svg.selectAll("circle.points")
       .data(data)
-      .exit()
-      .attr("r", 0).remove()
+      .exit().remove()
 
 n = 5
 data = []
@@ -131,4 +132,4 @@ randombutton.on "click", ->
 
 exitbutton.on "click", ->
            remove_datapoint()
-           recreate_points()
+           recreate_points(0)
