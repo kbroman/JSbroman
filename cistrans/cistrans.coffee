@@ -622,7 +622,7 @@ draw = (data) ->
 
       svg.selectAll("circle.plotPXG")
          .transition().duration(slowtime)
-         .attr("cx", (d,i) -> 
+         .attr("cx", (d,i) ->
               g = Math.abs(data.geno[marker][i])
               sx = data.sex[i]
               if(data.pmark[marker].chr is "X")
