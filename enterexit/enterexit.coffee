@@ -38,7 +38,7 @@ randomize_data = ->
     d.x = jitter_value(d.x, w)
     d.y = jitter_value(d.y, h)
 
-create_points = ->
+recreate_points = ->
    svg.selectAll("circle.points")
       .data(data)
       .enter()
@@ -65,9 +65,62 @@ data = []
 for i in [0...n]
   data.push(random_datapoint())
 
-create_points()
+recreate_points()
 
-svg.on "click", ->
+bh = 30
+bw = 90
+
+buttons = d3.select("div#buttons")
+            .append("svg")
+            .attr("height", bh+2*pad)
+            .attr("width", 3*bw+6*pad)
+
+enterbutton = buttons.append("rect")
+                     .attr("x", pad)
+                     .attr("y", pad)
+                     .attr("height", bh)
+                     .attr("width", bw)
+                     .attr("fill", "lightgreen")
+                     .attr("stroke", "black")
+                     .attr("stroke-width", "2")
+
+randombutton = buttons.append("rect")
+                     .attr("x", 3*pad+bw)
+                     .attr("y", pad)
+                     .attr("height", bh)
+                     .attr("width", bw)
+                     .attr("fill", "lightblue")
+                     .attr("stroke", "black")
+                     .attr("stroke-width", "2")
+
+exitbutton =  buttons.append("rect")
+                     .attr("x", 5*pad+2*bw)
+                     .attr("y", pad)
+                     .attr("height", bh)
+                     .attr("width", bw)
+                     .attr("fill", "pink")
+                     .attr("stroke", "black")
+                     .attr("stroke-width", "2")
+
+buttons.append("text")
+       .attr("y", pad + bh/2)
+       .attr("x", pad + bw/2)
+       .text("add")
+
+buttons.append("text")
+       .attr("y", pad + bh/2)
+       .attr("x", 3*pad + bw*1.5)
+       .text("randomize")
+
+buttons.append("text")
+       .attr("y", pad + bh/2)
+       .attr("x", 5*pad + bw*2.5)
+       .text("kill")
+
+enterbutton.on "click", ->
            add_datapoint()
+           recreate_points()
+
+randombutton.on "click", ->
            randomize_data()
-           create_points()
+           recreate_points()
