@@ -29,6 +29,10 @@ draw = (data) ->
   # gap between chromosomes in lower plot
   chrGap = 8
 
+  # transition speeds
+  slowtime = 1000
+  fasttime = 250
+
   # height of marker ticks in lower panel
   tickHeight = (bottom[1] - top[1])*0.02
 
@@ -408,7 +412,7 @@ draw = (data) ->
               markerClick[td] = 1
               d3.select(this).attr("opacity", 1).attr("fill",altpink).attr("stroke",purple)
 
-    draw_pxgXaxis = (pxgXaxis, means, genotypes, chr, sexcenter) ->
+    draw_pxgXaxis = (means, genotypes, chr, sexcenter, male) ->
       pxgXaxis.selectAll("line.PXGvert")
               .data(means)
               .enter()
@@ -423,7 +427,7 @@ draw = (data) ->
               .attr("stroke-width", "1")
       pxgXaxis.selectAll("line.PXGvert")
               .data(means)
-              .transition().duration(250)
+              .transition().duration(fasttime)
               .attr("x1", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
               .attr("x2", (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
       pxgXaxis.selectAll("line.PXGvert")
@@ -440,7 +444,7 @@ draw = (data) ->
               .attr("fill", labelcolor)
       pxgXaxis.selectAll("text.PXGgeno")
               .data(genotypes)
-              .transition().duration(250)
+              .transition().duration(fasttime)
               .text((d) -> d)
               .attr("x",  (d,i) -> return if(chr is "X") then pxgXscaleX(i) else pxgXscaleA(i))
       pxgXaxis.selectAll("text.PXGgeno")
@@ -458,14 +462,45 @@ draw = (data) ->
               .attr("fill", labelcolor)
       pxgXaxis.selectAll("text.PXGsex")
               .data(["Female", "Male"])
-              .transition().duration(250)
+              .transition().duration(fasttime)
               .attr("x", (d, i) -> sexcenter[i])
       pxgXaxis.selectAll("text.PXGsex")
               .data(["Female", "Male"])
               .exit().remove()
 
+      # add line segments
+      meanmarks.selectAll("line.PXGmeans")
+         .data(means)
+         .enter()
+         .append("line")
+         .attr("class", "PXGmeans")
+         .attr("x1", (d,i) ->
+            return if chr is "X" then pxgXscaleX(i)-jitterAmount*3 else pxgXscaleA(i)-jitterAmount*3)
+         .attr("x2", (d,i) ->
+            return if chr is "X" then pxgXscaleX(i)+jitterAmount*3 else pxgXscaleA(i)+jitterAmount*3)
+         .attr("y1", (d) -> pxgYscale(d))
+         .attr("y2", (d) -> pxgYscale(d))
+         .attr("stroke", (d,i) -> return if male[i] then darkblue else darkred)
+         .attr("stroke-width", 4)
+         .on("mouseover", efftip)
+         .on("mouseout", -> d3.selectAll("#efftip").remove())
+      meanmarks.selectAll("line.PXGmeans")
+         .data(means)
+         .transition().duration(slowtime)
+         .attr("x1", (d,i) ->
+            return if chr is "X" then pxgXscaleX(i)-jitterAmount*3 else pxgXscaleA(i)-jitterAmount*3)
+         .attr("x2", (d,i) ->
+            return if chr is "X" then pxgXscaleX(i)+jitterAmount*3 else pxgXscaleA(i)+jitterAmount*3)
+         .attr("y1", (d) -> pxgYscale(d))
+         .attr("y2", (d) -> pxgYscale(d))
+         .attr("stroke", (d,i) -> return if male[i] then darkblue else darkred)
+      meanmarks.selectAll("line.PXGmeans")
+         .data(means).exit().remove()
+
     pxgYscale = null
     pxgXaxis = svg.append("g").attr("class", "probe_data").attr("id", "pxg_xaxis")
+    meanmarks = svg.append("g").attr("id", "pxgmeans").attr("class", "probe_data")
+
     plotPXG = (marker) ->
       pxgYscale = d3.scale.linear()
                      .domain([d3.min(probe_data.pheno),
@@ -519,7 +554,7 @@ draw = (data) ->
       for i of means
         means[i] /= n[i]
 
-      draw_pxgXaxis(pxgXaxis, means, genotypes, chr, sexcenter)
+      draw_pxgXaxis(means, genotypes, chr, sexcenter, male)
 
       svg.append("g").attr("id", "plotPXG").attr("class", "probe_data").attr("id","PXGpoints").selectAll("empty")
           .data(probe_data.pheno)
@@ -553,23 +588,6 @@ draw = (data) ->
                d3.selectAll("#indtip").remove()
                d3.select(this).attr("r", peakRad)
 
-      # add line segments
-      svg.append("g").attr("id", "pxgmeans").attr("class", "probe_data").attr("class", "plotPXG")
-         .selectAll("empty")
-         .data(means)
-         .enter()
-         .append("line")
-         .attr("class", "PXGmeans")
-         .attr("x1", (d,i) ->
-            return if chr is "X" then pxgXscaleX(i)-jitterAmount*2 else pxgXscaleA(i)-jitterAmount*2)
-         .attr("x2", (d,i) ->
-            return if chr is "X" then pxgXscaleX(i)+jitterAmount*2 else pxgXscaleA(i)+jitterAmount*2)
-         .attr("y1", (d) -> pxgYscale(d))
-         .attr("y2", (d) -> pxgYscale(d))
-         .attr("stroke", (d,i) -> return if male[i] then darkblue else darkred)
-         .attr("stroke-width", 4)
-         .on("mouseover", efftip)
-         .on("mouseout", -> d3.selectAll("#efftip").remove())
 
 
     revPXG = (marker) ->
@@ -600,10 +618,10 @@ draw = (data) ->
       for i of means
         means[i] /= n[i]
 
-      draw_pxgXaxis(pxgXaxis, means, genotypes, chr, sexcenter)
+      draw_pxgXaxis(means, genotypes, chr, sexcenter, male)
 
       svg.selectAll("circle.plotPXG")
-         .transition().delay(250).duration(750)
+         .transition().duration(slowtime)
          .attr("cx", (d,i) -> 
               g = Math.abs(data.geno[marker][i])
               sx = data.sex[i]
