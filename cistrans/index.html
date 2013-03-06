@@ -4,16 +4,18 @@
     <meta charset="utf-8">
     <title>Interactive cis-trans eQTL plot</title>
     <link rel=stylesheet type="text/css" href="cistrans.css">
-    <script charset="utf-8" type="text/javascript" src="../../d3.js"></script>
-    <script type="text/javascript" src="../../d3.tip.js"></script>
+    <script charset="utf-8" type="text/javascript" src="../d3/d3.js"></script>
+    <script type="text/javascript" src="../d3-tip/d3.tip.js"></script>
 </head>
 
 <body>
 <h3>Interactive cis-trans eQTL plot</h3>
 
+<p id="loading">[Loading...]</p>
+
 <div id="cistrans"></div>
 
-<div style="width:700px;margin-left:25px;">
+<div id="legend" style="width:700px;margin-left:25px;opacity:0;">
 <p>In top figure, x-axis corresponds to marker location, y-axis is
 genomic position of probes on a gene expression microarray Each
 plotted point is an inferred eQTL with LOD > 10; opacity corresponds

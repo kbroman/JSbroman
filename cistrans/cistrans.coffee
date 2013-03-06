@@ -24,6 +24,9 @@
 # function that does all of the work
 draw = (data) ->
 
+  d3.select("p#loading").remove()
+  d3.select("div#legend").style("opacity", 1)
+
   # dimensions of panels
   w = [500, 300]
   h = [w[0], 200]
