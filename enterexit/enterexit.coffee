@@ -26,6 +26,10 @@ random_datapoint = ->
 add_datapoint = ->
   data.push(random_datapoint())
 
+remove_datapoint = ->
+  toremove = Math.floor(Math.random()*data.length)
+  data.splice(data, 1)
+
 jitterAmount = 50
 jitter_value = (val, max) ->
   val += Math.round(Math.random()*2*jitterAmount-jitterAmount)
@@ -123,4 +127,8 @@ enterbutton.on "click", ->
 
 randombutton.on "click", ->
            randomize_data()
+           recreate_points()
+
+exitbutton.on "click", ->
+           remove_datapoint()
            recreate_points()
