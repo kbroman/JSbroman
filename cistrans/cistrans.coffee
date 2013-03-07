@@ -144,6 +144,19 @@ draw = (data) ->
                  .domain(d3.range(4))
                  .rangePoints([left[2], right[2]], 1)
 
+  # swap genotypes in females on X chromsome
+  for m in data.markers
+    continue unless data.pmark[m].chr == "X"
+    for g,i in data.geno[m]
+      if data.sex[i] == 0
+        newg = 0
+        switch g
+          when -1 then newg = -2
+          when -2 then newg = -1
+          when +1 then newg = +2
+          when +2 then newg = +1
+        data.geno[m][i] = newg
+
   # create SVG
   svg = d3.select("div#cistrans").append("svg")
           .attr("width", totalw)
@@ -572,7 +585,7 @@ draw = (data) ->
         means = [0,0,0,0]
         n = [0,0,0,0]
         male = [0,0,1,1]
-        genotypes = ["RR", "BR", "BY", "RY"]
+        genotypes = ["BR", "RR", "BY", "RY"]
         sexcenter = [(pxgXscaleX(0) + pxgXscaleX(1))/2,
                      (pxgXscaleX(2) + pxgXscaleX(3))/2]
       else
@@ -636,7 +649,7 @@ draw = (data) ->
         means = [0,0,0,0]
         n = [0,0,0,0]
         male = [0,0,1,1]
-        genotypes = ["RR", "BR", "BY", "RY"]
+        genotypes = ["BR", "RR", "BY", "RY"]
         sexcenter = [(pxgXscaleX(0) + pxgXscaleX(1))/2,
                      (pxgXscaleX(2) + pxgXscaleX(3))/2]
       else
