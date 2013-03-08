@@ -5,6 +5,7 @@
     <title>Interactive cis-trans eQTL plot</title>
     <link rel=stylesheet type="text/css" href="cistrans.css">
     <script charset="utf-8" type="text/javascript" src="../d3/d3.js"></script>
+    <script type="text/javascript" src="../jquery/jquery.js"></script>
     <script type="text/javascript" src="../d3-tip/d3.tip.js"></script>
 </head>
 
@@ -12,6 +13,31 @@
 <h3>Interactive cis-trans eQTL plot</h3>
 
 <p id="loading">[Loading...]</p>
+
+
+<div id="geneinput" style="opacity:0;">
+<form name="geneinput">
+<input type="submit" id="submit" value="Gene symbol:" />
+<input id="genesymbol" type="text" />
+<a id="currentgenesymbol" style="opacity:0;"></a>
+</form>
+
+
+<script type="text/javascript">
+$("#geneinput").submit(function () {
+  submitGene();
+  return false;
+});
+
+function submitGene(event) {
+  console.log("Click!")
+  var value = document.getElementById("genesymbol").value;
+  console.log(value);
+  d3.selectAll("a#currentgenesymbol")
+    .text(value);
+}
+</script>
+</div>
 
 <div id="cistrans"></div>
 
