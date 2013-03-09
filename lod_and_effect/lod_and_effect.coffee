@@ -78,6 +78,12 @@ draw = (data) ->
            .attr("width", wInner[j])
            .attr("class", "innerBox")
 
+  # for females, swap X chromosome genotypes 1 <-> 2
+  for m of data.markerindex["X"]
+    for sex,i in data.sex
+      if sex == 0
+        data.geno[m][i] = 3 - data.geno[m][i]
+
   # maximum LOD score
   maxLod = 0
   for i in data.chr
@@ -187,6 +193,10 @@ draw = (data) ->
           hi.push(me+se)
           male.push(sex is "Male")
           genotypes.push(g)
+
+    if chr == "X"
+      genotypes[0] = "BR"
+      genotypes[1] = "RR"
 
      xScale[2] = d3.scale.ordinal()
                    .domain(d3.range(mean.length))
