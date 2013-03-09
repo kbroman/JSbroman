@@ -84,6 +84,18 @@ draw = (data) ->
     currentMax = d3.max(data.lod[i].lod)
     maxLod = currentMax if maxLod < currentMax
 
+  # for each chromosome, find the marker with maximum LOD score
+  maxLodByChr = {}
+  maxLodByChr_marker = {}
+  for i in data.chr
+    maxLodByChr[i] = 0
+    maxLodByChr[i] = ""
+    for m of data.markerindex[i]
+      lod = data.lod[i].lod[data.markerindex[i][m]]
+      if lod > maxLodByChr[i]
+        maxLodByChr[i] = lod
+        maxLodByChr_marker[i] = m
+
   # maximum effect + SE and minimum effect - SE
   effMax = null
   effMin = null
@@ -356,7 +368,7 @@ draw = (data) ->
   randomDraw = (x) -> x[Math.floor(Math.random()*x.length)]
 
   randomChr = randomDraw(data.chr)
-  randomMarker = randomDraw(data.markers[randomChr])
+  randomMarker = maxLodByChr_marker[randomChr]
 
   # initial phenotype vs genotype plot
   initialPXG = (chr, marker) ->
@@ -607,6 +619,13 @@ draw = (data) ->
                           .attr("stroke", "black")
                           .attr("stroke-width", "1")
 
+             marker = maxLodByChr_marker[d]
+             pos = data.lod[d].pos[data.markerindex[d][marker]]
+             title = "#{marker} (chr #{d}, #{onedig(pos)} cM)"
+             d3.select("text#botRtitle").text(title)
+             d3.select("#circle#{marker}").attr("opacity", 1).attr("fill",pink).attr("stroke",purple)
+             effectPlot d, marker
+             revPXG d, marker
 
   # chr labels
   topsvg.append("g").attr("id", "chrLabels").selectAll("empty")
