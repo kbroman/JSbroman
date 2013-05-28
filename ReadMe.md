@@ -1,6 +1,6 @@
-JSbroman
-----------------------------------------------
-Karl W Broman
+### JSbroman
+
+Karl W Broman,
 [http://www.biostat.wisc.edu/~kbroman](http://www.biostat.wisc.edu/~kbroman)
 
 Bits of JavaScript and CoffeeScript code, as I
@@ -14,3 +14,4 @@ moved the substantive ones to a separate repository:
 There is some really awful code in here.
 I just barely know what I'm doing.
 
+[![CC BY](http://i.creativecommons.org/l/by/3.0/88x31.png)](http://creativecommons.org/licenses/by/3.0/)
