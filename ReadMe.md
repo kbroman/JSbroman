@@ -14,4 +14,5 @@ moved the substantive ones to a separate repository:
 There is some really awful code in here.
 I just barely know what I'm doing.
 
-[![CC BY](http://i.creativecommons.org/l/by/3.0/88x31.png)](http://creativecommons.org/licenses/by/3.0/)
+---
+Licensed under the [MIT license](License.md). ([More information](http://en.wikipedia.org/wiki/MIT_License))
