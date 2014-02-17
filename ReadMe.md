@@ -11,8 +11,5 @@ There are some small examples of [d3](http://d3js.org) here, but I've
 moved the substantive ones to a separate repository: 
 [d3examples](http://github.com/kbroman/d3examples)
 
-There is some really awful code in here.
-I just barely know what I'm doing.
-
 ---
 Licensed under the [MIT license](License.md). ([More information](http://en.wikipedia.org/wiki/MIT_License))
